@@ -20,6 +20,7 @@ export default function AdminQuiz() {
     const [moduleId, setModuleId] = useState(null)
     const [itemsData, setItemsData] = useState(null)
     
+    
 
     const getCourse = async () => {
         try {
@@ -33,6 +34,10 @@ export default function AdminQuiz() {
         } catch (error) {
             console.error(error);
             setCourseData([]); // Set to an empty array in case of an error
+            if(error?.status === 401){
+                navigate('/login')
+                localStorage.clear()
+            }
         }
     };
 
@@ -51,6 +56,10 @@ export default function AdminQuiz() {
         } catch (error) {
             console.error(error);
             setModuleData([]); // Очистка модулей в случае ошибки
+            if(error?.status === 401){
+                navigate('/login')
+                localStorage.clear()
+            }
         }
     };
     const GetQuiz = async (moduleID) => {
@@ -69,6 +78,10 @@ export default function AdminQuiz() {
         } catch (error) {
             console.error(error);
             setQuize([]); // Очистка модулей в случае ошибки
+            if(error?.status === 401){
+                navigate('/login')
+                localStorage.clear()
+            }
         }
     };
 

@@ -7,6 +7,7 @@ import ReactLoading from 'react-loading';
 import CreateStudent from "../Components/AdminStudent/CreateStudent";
 import DeleteStudent from "../Components/AdminStudent/DeleteStudent";
 import EditStudent from "../Components/AdminStudent/EditStudent";
+import { useNavigate } from "react-router-dom";
 
 
 export default function AdminStudent() {
@@ -16,6 +17,7 @@ export default function AdminStudent() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true)
     const [itemsData, setItemsData] = useState(null)
+    const navigate = useNavigate()
     const [pagination, setPagination] = useState({
         currentPage: 0,
         totalPages: 0,
@@ -46,6 +48,10 @@ export default function AdminStudent() {
             });
         } catch (error) {
             console.log(error);
+            if (error?.status === 401) {
+                navigate('/login')
+                localStorage.clear()
+            }
         } finally {
             setLoading(false)
         }

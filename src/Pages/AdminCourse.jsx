@@ -4,6 +4,7 @@ import DeleteCourse from "../Components/AdminCourse/DeleteCourse";
 import EditCourse from "../Components/AdminCourse/EditCourse";
 import axios from "axios";
 import ReactLoading from 'react-loading';
+import { useNavigate } from "react-router-dom";
 
 export default function AdminCourse() {
   // Fake course data
@@ -13,6 +14,7 @@ export default function AdminCourse() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [itemData, setItemData] = useState(null)
+  const navigate = useNavigate()
 
   const getCourse = async () => {
     try {
@@ -23,7 +25,10 @@ export default function AdminCourse() {
       })
       setData(response?.data?.object)
     } catch (error) {
-      console.log(error)
+      if (error?.status === 401) {
+        navigate('/login')
+        localStorage.clear()
+      }
     } finally {
       setLoading(false)
     }
@@ -87,9 +92,9 @@ export default function AdminCourse() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-[300px]">
-              <h1>
-                Empty Data
-              </h1>
+            <h1>
+              Empty Data
+            </h1>
           </div>
         )}
 

@@ -4,6 +4,7 @@ import WarningModal from "../Components/WarningModal";
 import { useEffect, useState } from "react";
 import QuizCard from "../Components/User/QuizCard";
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from "react-router-dom";
 
 
 export default function Home() {
@@ -16,7 +17,7 @@ export default function Home() {
     const [time, setTime] = useState(null)
     const moduleId = useSelector((state) => state.counter.moduleId); // Получаем moduleId из Redux
     const count = useSelector((state) => state.counter.value); // Получаем значение счетчика из Redux
-
+    const navigate = useNavigate()
 
 
     const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -40,6 +41,10 @@ export default function Home() {
             setUserData(response?.data?.object)
         } catch (error) {
             console.log(error)
+            if(error?.status === 401){
+                navigate('/login')
+                localStorage.clear()
+            }
         }
     }
 
@@ -57,6 +62,10 @@ export default function Home() {
             setTime(response?.data?.object[moduleId]?.testTimeMinute)
         } catch (error) {
             console.log(error)
+            if(error?.status === 401){
+                navigate('/login')
+                localStorage.clear()
+            }
         }
     }
 
@@ -74,6 +83,10 @@ export default function Home() {
             setQuizData(response?.data?.object)
         } catch (error) {
             console.log(error)
+            if(error?.status === 401){
+                navigate('/login')
+                localStorage.clear()
+            }
         }
     }
 

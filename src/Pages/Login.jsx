@@ -27,7 +27,7 @@ const Login = () => {
         localStorage.setItem('role', response?.data?.object?.accountType === "ADMIN" ? 'DQWIJDWIOEFAD' : "FWENFDEWST")
         if (role === 'ADMIN') {
           navigate('/admin/course')
-        } else {
+        } else{
           navigate('/')
         }
 

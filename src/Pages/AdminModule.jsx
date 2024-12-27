@@ -4,6 +4,7 @@ import DeleteModule from "../Components/AdminModule/DeleteModule";
 import EditModule from "../Components/AdminModule/EditModule";
 import axios from "axios";
 import ReactLoading from 'react-loading';
+import { useNavigate } from "react-router-dom";
 
 
 export default function AdminModule() {
@@ -12,7 +13,8 @@ export default function AdminModule() {
     const [editModal, setEditModal] = useState(false);
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true)
-    const [itemsData, setItemsData ] = useState(null)
+    const [itemsData, setItemsData] = useState(null)
+    const navigate = useNavigate()
     const [pagination, setPagination] = useState({
         currentPage: 0,
         totalPages: 0,
@@ -41,7 +43,10 @@ export default function AdminModule() {
                 pageSize: responseData.size
             });
         } catch (error) {
-            console.log(error);
+            if (error?.status === 401) {
+                navigate('/login')
+                localStorage.clear()
+            }
         } finally {
             setLoading(false)
         }
@@ -100,7 +105,7 @@ export default function AdminModule() {
                                         <td className="py-3 px-4 text-sm text-gray-800">{course?.createdAt?.split('T')[0]}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800">
                                             <button
-                                                onClick={() => {setEditModal(true); setItemsData(course)}}
+                                                onClick={() => { setEditModal(true); setItemsData(course) }}
                                                 className="text-blue-600 text-[25px] hover:text-blue-800"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
@@ -108,7 +113,7 @@ export default function AdminModule() {
                                                 </svg>
                                             </button>
                                             <button
-                                                onClick={() => {setDeleteCourse(true); setItemsData(course?.id)}}
+                                                onClick={() => { setDeleteCourse(true); setItemsData(course?.id) }}
                                                 className="text-red-600 ml-3 text-[25px] hover:text-red-800"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">

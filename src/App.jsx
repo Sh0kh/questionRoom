@@ -13,10 +13,10 @@ import QuestionCreate from "./Components/AdminQuiz/QuestionCreate";
 import ErrorPage from "./Pages/ErrorPage";
 
 function ProtectedRoute({ children }) {
-  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");  // Check for token
 
-  // Замените 'FWENFDEWST' на разрешенное значение роли
-  if (role === "FWENFDEWST") {
+  // Redirect to login page if no token is found
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 
@@ -28,14 +28,16 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+
+        {/* Main Route */}
         <Route path="/" element={<AppLayout />}>
-          {/* Главные маршруты */}
+          {/* Main Routes */}
           <Route element={<MainLayout />}>
             <Route index element={<Home />} />
             <Route path="/warning" element={<ErrorPage />} />
           </Route>
 
-          {/* Административные маршруты */}
+          {/* Admin Routes - Protected */}
           <Route
             element={
               <ProtectedRoute>
@@ -50,7 +52,7 @@ function App() {
             <Route path="admin/quiz/create/:ID" element={<QuestionCreate />} />
           </Route>
 
-          {/* Перенаправление для всех остальных маршрутов */}
+          {/* Catch-all route for undefined paths */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Route>
       </Routes>
