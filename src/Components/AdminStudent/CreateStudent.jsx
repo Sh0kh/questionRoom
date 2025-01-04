@@ -15,6 +15,8 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
     const [password, setPassword] = useState()
     const [gender, setGender] = useState(null)
     const [Group, setGroup] = useState(null)
+    const [school, setSchool] = useState('')
+    const [email, setEmail] = useState('')
 
 
     const getCourse = async () => {
@@ -50,7 +52,9 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                 phoneNumber: phoneNumber,
                 password: password,
                 gender: gender,
-                group:Group
+                group: Group,
+                email:email,
+                school:school
             }
             const response = await axios.post(`users/admin`, newData, {
                 headers: {
@@ -194,6 +198,30 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                     value={Group}
                                     onChange={(e) => setGroup(e.target.value)}
                                     label="Sinif"
+                                    color="gray"  // Changed to gray for a neutral look
+                                    type="text"
+                                    required
+                                    className="border-black"  // Black border color
+                                />
+                            </div>
+                        </div>
+                        <div className='flex items-center gap-[10px]'>
+                            <div className='mt-[20px] w-full'>
+                                <Input
+                                    value={school}
+                                    onChange={(e) => setSchool(e.target.value)}
+                                    label="Maktab"
+                                    color="gray"  // Changed to gray for a neutral look
+                                    type="text"
+                                    required
+                                    className="border-black"  // Black border color
+                                />
+                            </div>
+                            <div className='mt-[20px] w-full'>
+                                <Input
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    label="Email"
                                     color="gray"  // Changed to gray for a neutral look
                                     type="text"
                                     required

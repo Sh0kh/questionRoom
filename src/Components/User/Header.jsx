@@ -10,8 +10,11 @@ export default function Header({ currectAnswer, incorrectAnswer, data, moduleDat
     const [finishModal, setFinishModal] = useState(false)
 
     const navigate = useNavigate()
+
+    console.log(time)
+
     useEffect(() => {
-        if (time === undefined || time === 0) {
+        if (time === undefined || time === null || time === 0) {
             navigate('/result')
             CloseTest()
             localStorage.removeItem('courseId')

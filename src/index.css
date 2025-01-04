@@ -37,6 +37,13 @@ body{
   transition: right 0.3s ease-in-out;
   border-radius: 5px;
 }
+.Modal3Content{
+  width: 60%;
+  background-color: #fff;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  transition: right 0.3s ease-in-out;
+  border-radius: 5px;
+}
 
 ::-webkit-scrollbar{
     width: 8px;
@@ -55,4 +62,11 @@ body{
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+.search__wrapper{
+  width: 100%;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(4 ,1fr);
+  gap: 10px;
 }

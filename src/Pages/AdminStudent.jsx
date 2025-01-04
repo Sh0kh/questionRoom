@@ -20,12 +20,15 @@ export default function AdminStudent() {
     const [phoneNumber, setPhoneNumber] = useState('')
     const [lastName, setLastName] = useState('')
     const [gender, setGender] = useState(null)
+    const [email, setEmail] = useState('')
+    const [school, setSchool] = useState('')
+    const [sinif, setSinif] = useState('')
 
     const [pagination, setPagination] = useState({
         currentPage: 0,
         totalPages: 0,
         totalElements: 0,
-        pageSize: 5
+        pageSize: 20
     });
 
 
@@ -42,7 +45,10 @@ export default function AdminStudent() {
                     firstName: firstName,
                     page: page,
                     size: pagination.pageSize,
-                    gender: gender
+                    gender: gender,
+                    email:email,
+                    school:school,
+                    group:sinif
                 }
             });
 
@@ -89,7 +95,7 @@ export default function AdminStudent() {
 
 
     return (
-        <div className="w-full h-screen bg-gray-100 p-6 md:p-10">
+        <div className="w-full h-screen overflow-y-auto bg-gray-100 p-6 md:p-10">
             <div className="bg-white p-6 rounded-lg shadow-lg shadow-gray-200">
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-[20px]">
@@ -101,72 +107,97 @@ export default function AdminStudent() {
                         Talaba yaratish
                     </button>
                 </div>
-                <div className="flex items-center gap-[10px] mb-[20px]">
-                    <Input
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        label="Ism"
-                        color="gray"  // Changed to gray for a neutral look
-                        type="text"
-                        required
-                        className="border-black"  // Black border color
-                    />
-                    <Input
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        label="Familiya"
-                        color="gray"  // Changed to gray for a neutral look
-                        type="text"
-                        required
-                        className="border-black"  // Black border color
-                    />
-                    <Input
-                        value={phoneNumber}
-                        onChange={(e) => {
-                            const input = e.target.value;
+                <div className="flex items-start gap-[10px]">
+                    <div className="w-full search__wrapper">
+                        <Input
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            label="Ism"
+                            color="gray"  // Changed to gray for a neutral look
+                            type="text"
+                            required
+                            className="border-black"  // Black border color
+                        />
+                        <Input
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            label="Familiya"
+                            color="gray"  // Changed to gray for a neutral look
+                            type="text"
+                            required
+                            className="border-black"  // Black border color
+                        />
+                        <Input
+                            value={phoneNumber}
+                            onChange={(e) => {
+                                const input = e.target.value;
 
-                            // Удаляем любые символы, кроме цифр
-                            const numericValue = input.replace(/\D/g, "");
+                                // Удаляем любые символы, кроме цифр
+                                const numericValue = input.replace(/\D/g, "");
 
-                            // Префикс +998 не должен быть удалён
-                            let formattedValue = "+998";
+                                // Префикс +998 не должен быть удалён
+                                let formattedValue = "+998";
 
-                            // Добавляем цифры после +998, но не более 9 символов
-                            if (numericValue.startsWith("998")) {
-                                formattedValue += numericValue.slice(3, 12); // Убираем "998" из начала
-                            } else {
-                                formattedValue += numericValue.slice(0, 9); // Просто добавляем оставшиеся цифры
-                            }
+                                // Добавляем цифры после +998, но не более 9 символов
+                                if (numericValue.startsWith("998")) {
+                                    formattedValue += numericValue.slice(3, 12); // Убираем "998" из начала
+                                } else {
+                                    formattedValue += numericValue.slice(0, 9); // Просто добавляем оставшиеся цифры
+                                }
 
-                            setPhoneNumber(formattedValue);
-                        }}
-                        label="Telefon raqam"
-                        color="gray"
-                        type="text" // Используем text, чтобы разрешить ввод "+"
-                        required
-                        className="border-black"
-                        maxLength={13} // Ограничиваем длину ввода до 13 символов
-                    />
-                    <Select
-                        className="bg-[white]"
-                        label="Jinsi"
-                        onChange={(value) => setGender(value)}
-                    >
-                        <Option key="male" value="ERKAK">
-                            Erkkak
-                        </Option>
-                        <Option key="female" value="AYOL">
-                            Ayol
-                        </Option>
-                    </Select>
-
+                                setPhoneNumber(formattedValue);
+                            }}
+                            label="Telefon raqam"
+                            color="gray"
+                            type="text" // Используем text, чтобы разрешить ввод "+"
+                            required
+                            className="border-black"
+                            maxLength={13} // Ограничиваем длину ввода до 13 символов
+                        />
+                        <Select
+                            className="bg-[white]"
+                            label="Jinsi"
+                            onChange={(value) => setGender(value)}
+                        >
+                            <Option key="male" value="ERKAK">
+                                Erkkak
+                            </Option>
+                            <Option key="female" value="AYOL">
+                                Ayol
+                            </Option>
+                        </Select>
+                        <Input
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            label="Email"
+                            color="gray"  // Changed to gray for a neutral look
+                            type="text"
+                            required
+                            className="border-black"  // Black border color
+                        />
+                        <Input
+                            value={school}
+                            onChange={(e) => setSchool(e.target.value)}
+                            label="Maktab"
+                            color="gray"  // Changed to gray for a neutral look
+                            type="text"
+                            required
+                            className="border-black"  // Black border color
+                        />
+                        <Input
+                            value={sinif}
+                            onChange={(e) => setSinif(e.target.value)}
+                            label="Sinif"
+                            color="gray"  // Changed to gray for a neutral look
+                            type="text"
+                            required
+                            className="border-black"  // Black border color
+                        />
+                    </div>
                     <Button className="w-[200px]" onClick={() => getStudent(pagination.currentPage)}>
                         Izlash
                     </Button>
-
-
                 </div>
-
                 {data && data?.length > 0 ? (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left table-auto">
