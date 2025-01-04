@@ -53,9 +53,9 @@ export default function AdminCourse() {
       <div className="bg-white p-6 rounded-lg shadow-lg shadow-gray-200">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-[50px]">
-          <h1 className="text-2xl font-semibold text-gray-800">All Courses</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Barcha Kurslar</h1>
           <button onClick={() => setCreateModal(true)} className="bg-[#272C4B] text-white py-2 px-6 rounded-md text-sm font-medium transition-all hover:bg-[#272c4be3]">
-            + Add New Course
+            Kurs yaratish
           </button>
         </div>
         {data && data?.length > 0 ? (
@@ -63,9 +63,9 @@ export default function AdminCourse() {
             <table className="w-full text-left table-auto">
               <thead>
                 <tr>
-                  <th className="py-3 px-4 text-sm font-medium text-gray-600">Course Name</th>
-                  <th className="py-3 px-4 text-sm font-medium text-gray-600">Creatted At</th>
-                  <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                  <th className="py-3 px-4 text-sm font-medium text-gray-600">Kurs nomi</th>
+                  <th className="py-3 px-4 text-sm font-medium text-gray-600">Yaralgan vaqti</th>
+                  <th className="py-3 px-4 text-sm font-medium text-gray-600">Sozlama</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,29 +1,34 @@
 import React, { useEffect, useState } from "react";
-import CreateModule from "../Components/AdminModule/CreateModule";
-import DeleteModule from "../Components/AdminModule/DeleteModule";
-import EditModule from "../Components/AdminModule/EditModule";
 import axios from "axios";
 import ReactLoading from 'react-loading';
 import CreateStudent from "../Components/AdminStudent/CreateStudent";
 import DeleteStudent from "../Components/AdminStudent/DeleteStudent";
+import { Button, Input, Select, Option } from '@material-tailwind/react';
 import EditStudent from "../Components/AdminStudent/EditStudent";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 
 export default function AdminStudent() {
     const [createModal, setCreateModal] = useState(false);
+    const [firstName, setFirstName] = useState('')
     const [deleteCourse, setDeleteCourse] = useState(false);
     const [editModal, setEditModal] = useState(false);
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true)
     const [itemsData, setItemsData] = useState(null)
     const navigate = useNavigate()
+    const [phoneNumber, setPhoneNumber] = useState('')
+    const [lastName, setLastName] = useState('')
+    const [gender, setGender] = useState(null)
+
     const [pagination, setPagination] = useState({
         currentPage: 0,
         totalPages: 0,
         totalElements: 0,
         pageSize: 5
     });
+
+
 
     const getStudent = async (page = 0) => {
         try {
@@ -32,9 +37,12 @@ export default function AdminStudent() {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
                 params: {
+                    phoneNumber: phoneNumber,
                     accountType: 'STUDENT',
+                    firstName: firstName,
                     page: page,
-                    size: pagination.pageSize
+                    size: pagination.pageSize,
+                    gender: gender
                 }
             });
 
@@ -56,6 +64,9 @@ export default function AdminStudent() {
             setLoading(false)
         }
     };
+
+
+
 
     useEffect(() => {
         getStudent();
@@ -81,14 +92,79 @@ export default function AdminStudent() {
         <div className="w-full h-screen bg-gray-100 p-6 md:p-10">
             <div className="bg-white p-6 rounded-lg shadow-lg shadow-gray-200">
                 {/* Header Section */}
-                <div className="flex justify-between items-center mb-[50px]">
-                    <h1 className="text-2xl font-semibold text-gray-800">All Student</h1>
+                <div className="flex justify-between items-center mb-[20px]">
+                    <h1 className="text-2xl font-semibold text-gray-800">Barcha talabalar</h1>
                     <button
                         onClick={() => setCreateModal(true)}
                         className="bg-[#272C4B] text-white py-2 px-6 rounded-md text-sm font-medium transition-all hover:bg-[#272c4be3]"
                     >
-                        + Add New Student
+                        Talaba yaratish
                     </button>
+                </div>
+                <div className="flex items-center gap-[10px] mb-[20px]">
+                    <Input
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        label="Ism"
+                        color="gray"  // Changed to gray for a neutral look
+                        type="text"
+                        required
+                        className="border-black"  // Black border color
+                    />
+                    <Input
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        label="Familiya"
+                        color="gray"  // Changed to gray for a neutral look
+                        type="text"
+                        required
+                        className="border-black"  // Black border color
+                    />
+                    <Input
+                        value={phoneNumber}
+                        onChange={(e) => {
+                            const input = e.target.value;
+
+                            // Удаляем любые символы, кроме цифр
+                            const numericValue = input.replace(/\D/g, "");
+
+                            // Префикс +998 не должен быть удалён
+                            let formattedValue = "+998";
+
+                            // Добавляем цифры после +998, но не более 9 символов
+                            if (numericValue.startsWith("998")) {
+                                formattedValue += numericValue.slice(3, 12); // Убираем "998" из начала
+                            } else {
+                                formattedValue += numericValue.slice(0, 9); // Просто добавляем оставшиеся цифры
+                            }
+
+                            setPhoneNumber(formattedValue);
+                        }}
+                        label="Telefon raqam"
+                        color="gray"
+                        type="text" // Используем text, чтобы разрешить ввод "+"
+                        required
+                        className="border-black"
+                        maxLength={13} // Ограничиваем длину ввода до 13 символов
+                    />
+                    <Select
+                        className="bg-[white]"
+                        label="Jinsi"
+                        onChange={(value) => setGender(value)}
+                    >
+                        <Option key="male" value="ERKAK">
+                            Erkkak
+                        </Option>
+                        <Option key="female" value="AYOL">
+                            Ayol
+                        </Option>
+                    </Select>
+
+                    <Button className="w-[200px]" onClick={() => getStudent(pagination.currentPage)}>
+                        Izlash
+                    </Button>
+
+
                 </div>
 
                 {data && data?.length > 0 ? (
@@ -96,18 +172,34 @@ export default function AdminStudent() {
                         <table className="w-full text-left table-auto">
                             <thead>
                                 <tr>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Name</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Data birth</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Start Date</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Ism</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Tug`ilgan kuni</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Telefon</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Test</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Sozlama</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {data?.map((course) => (
                                     <tr key={course.id} className="border-t border-t-[2px] cursor-pointer hover:bg-gray-50">
-                                        <td className="py-3 px-4 text-sm text-gray-800">{course.firstName} {course.lastName}</td>
+                                        <td className="py-3 px-4 text-sm text-gray-800">
+                                            <NavLink
+                                                className="underline"
+                                                to={`/admin/student/${course?.id}?firstName=${course.firstName}&lastName=${course.lastName}`}
+                                            >
+                                                {course.firstName} {course.lastName}
+                                            </NavLink>
+                                        </td>
                                         <td className="py-3 px-4 text-sm text-gray-800">{course?.dateBirth}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800">{course?.username}</td>
+                                        <td className="py-3 px-4 text-sm text-gray-800">
+                                            {course?.courseId === null ? (
+                                                <svg className="text-[20px] text-[green]" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"></path></svg>
+                                            ) : (
+                                                <svg className="text-[red]" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" d="m13.5.5l-13 13m0-13l13 13"></path></svg>
+                                            )}
+
+                                        </td>
                                         <td className="py-3 px-4 text-sm text-gray-800">
                                             <button
                                                 onClick={() => { setEditModal(true); setItemsData(course) }}
@@ -134,7 +226,7 @@ export default function AdminStudent() {
                 ) : (
                     <div className="flex items-center justify-center h-[300px]">
                         <h1>
-                            Empty Data
+                            Ma'lumot yoq
                         </h1>
                     </div>
                 )}
@@ -143,7 +235,6 @@ export default function AdminStudent() {
                 {/* Pagination Section */}
                 <div className="mt-6 flex justify-between items-center">
                     <div className="text-sm text-gray-600">
-                        Showing {data.length} of {pagination.totalElements} entries
                     </div>
                     <div className="flex items-center space-x-3">
                         <button
@@ -161,7 +252,7 @@ export default function AdminStudent() {
 
                         <div className="flex items-center">
                             <div className="w-16 text-center px-2 py-1 border border-gray-300 rounded-md text-sm">
-                                {pagination.currentPage + 1} of {pagination.totalPages}
+                                {pagination.currentPage + 1} / {pagination.totalPages}
                             </div>
                         </div>
 

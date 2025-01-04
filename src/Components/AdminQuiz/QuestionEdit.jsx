@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { Button, Input, Select, Option } from "@material-tailwind/react";
 import axios from "axios";
 
-export default function QuestionCreate() {
+export default function QuestionEdit() {
     const [questionOptions, setQuestionOptions] = useState([
         { text: "", correctAnswer: true },
         { text: "", correctAnswer: false },
@@ -21,7 +21,7 @@ export default function QuestionCreate() {
     const [file, setFile] = useState(null);
     const [fileId, setFileID] = useState()
 
-    
+
     const questionTypes = [
         { value: 'IMAGE_BASED', label: 'Image-Based' },
         { value: 'LISTENING', label: 'Listening' },

@@ -43,7 +43,7 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
             {quizData?.map((i, index) => (
                 <div key={i.id} className="bg-white mt-6 p-6 rounded-lg shadow-lg shadow-gray-200">
                     <h1 className="font-bold text-xl mb-4">
-                        Question №{index + 1}
+                        Savol №{index + 1}
                     </h1>
                     <h2 className="text-lg mb-6">
                         {i?.question}

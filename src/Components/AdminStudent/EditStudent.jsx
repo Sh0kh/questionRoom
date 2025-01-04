@@ -13,6 +13,10 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
     const [lastName, setLastName] = useState('')
     const [phoneNumber, setPhoneNumber] = useState('')
     const [password, setPassword] = useState()
+    const [gender, setGender] = useState(null)
+    const [Group, setGroup] = useState(null)
+
+
 
     console.log(data)
 
@@ -24,6 +28,8 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
             setFirstName(data?.firstName || "")
             setLastName(data?.lastName || '')
             setPhoneNumber(data?.phoneNumber || '')
+            setGender(data?.gender || '')
+            setGroup(data?.group || '')
         }
     }, [data])
 
@@ -51,7 +57,7 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
     const EditStudent = async () => {
         try {
             const newData = {
-                id:data?.id,
+                id: data?.id,
                 accountType: 'STUDENT',
                 courseId: courseId,
                 creatorId: localStorage.getItem('userId'),
@@ -105,7 +111,7 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
                         <h1 className="text-[#272C4B] text-[22px]">
-                            Edit Student
+                            Talabani o'zgartirish
                         </h1>
                         <button onClick={onClose}>
                             <svg className='text-[#5E5C5A] text-[13px]' xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14">
@@ -118,7 +124,7 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                             <Input
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
-                                label="First name"
+                                label="Ism"
                                 color="gray"  // Changed to gray for a neutral look
                                 type="text"
                                 required
@@ -127,7 +133,7 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                             <Input
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
-                                label="Last name"
+                                label="Familiya"
                                 color="gray"  // Changed to gray for a neutral look
                                 type="text"
                                 required
@@ -135,7 +141,8 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                             />
                         </div>
                         <div className='mt-[20px]'>
-                            <Select className="bg-[white]" label="Choose a course" onChange={handleSelectChange}>
+                            <Select
+                                className="bg-[white]" label="Kurs" onChange={handleSelectChange}>
                                 {Array.isArray(courseData) && courseData.map(course => (
                                     <Option key={course.id} value={course.id}>
                                         {course.name}
@@ -143,47 +150,97 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                                 ))}
                             </Select>
                         </div>
+                        <div className='flex items-center gap-[10px]'>
+                            <div className='mt-[20px] w-full'>
+                                <Input
+                                    value={dataBirth}
+                                    onChange={(e) => setDataBirth(e.target.value)}
+                                    label="Tug'ilgan sana"
+                                    color="gray"  // Changed to gray for a neutral look
+                                    type="date"
+                                    required
+                                    className="border-black"  // Black border color
+                                />
+                            </div>
+                            <div className='mt-[20px] w-full'>
 
-                        <div className='mt-[20px]'>
-                            <Input
-                                value={dataBirth}
-                                onChange={(e) => setDataBirth(e.target.value)}
-                                label="Date birth"
-                                color="gray"  // Changed to gray for a neutral look
-                                type="date"
-                                required
-                                className="border-black"  // Black border color
-                            />
+                                <Select
+                                    className="bg-[white]"
+                                    label="Jinsi"
+                                    value={gender}
+                                    onChange={(value) => setGender(value)}
+                                >
+                                    <Option key="male" value="ERKAK">
+                                        Erkkak
+                                    </Option>
+                                    <Option key="female" value="AYOL">
+                                        Ayol
+                                    </Option>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className='flex items-center gap-[10px]'>
+                            <div className='mt-[20px] w-full'>
+                                <Input
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    label="Parol"
+                                    color="gray"  // Changed to gray for a neutral look
+                                    type="text"
+                                    required
+                                    className="border-black"  // Black border color
+                                />
+                            </div>
+                            <div className='mt-[20px] w-full'>
+                                <Input
+                                    value={Group}
+                                    onChange={(e) => setGroup(e.target.value)}
+                                    label="Sinif"
+                                    color="gray"  // Changed to gray for a neutral look
+                                    type="text"
+                                    required
+                                    className="border-black"  // Black border color
+                                />
+                            </div>
                         </div>
                         <div className='mt-[20px]'>
                             <Input
                                 value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                label="Phone number"
-                                color="gray"  // Changed to gray for a neutral look
-                                type="number"
+                                onChange={(e) => {
+                                    const input = e.target.value;
+
+                                    // Удаляем любые символы, кроме цифр
+                                    const numericValue = input.replace(/\D/g, "");
+
+                                    // Префикс +998 не должен быть удалён
+                                    let formattedValue = "+998";
+
+                                    // Добавляем цифры после +998, но не более 9 символов
+                                    if (numericValue.startsWith("998")) {
+                                        formattedValue += numericValue.slice(3, 12); // Убираем "998" из начала
+                                    } else {
+                                        formattedValue += numericValue.slice(0, 9); // Просто добавляем оставшиеся цифры
+                                    }
+
+                                    setPhoneNumber(formattedValue);
+                                }}
+                                label="Telefon raqam"
+                                color="gray"
+                                type="text" // Используем text, чтобы разрешить ввод "+"
                                 required
-                                className="border-black"  // Black border color
+                                className="border-black"
+                                maxLength={13} // Ограничиваем длину ввода до 13 символов
                             />
+
                         </div>
-                        <div className='mt-[20px]'>
-                            <Input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                label="Password"
-                                color="gray"  // Changed to gray for a neutral look
-                                type="text"
-                                required
-                                className="border-black"  // Black border color
-                            />
-                        </div>
+
                         <Button
                             onClick={EditStudent}
                             fullWidth
                             color="gray"  // Changed to gray for a neutral button
                             className="bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800"
                         >
-                            Edit
+                            O'zgartirish
                         </Button>
                     </div>
                 </div>

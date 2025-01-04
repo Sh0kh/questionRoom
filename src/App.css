@@ -1,6 +1,6 @@
 .Login{
-    /* background-image: url(https://i.pinimg.com/736x/39/7a/31/397a314b4f6e6afb758953a632cc4402.jpg); */
-    background-position: center;
+    background-image: url('./img/loginbg.jpg');
+    /* background-position: ; */
     background-repeat: no-repeat;
     background-size: cover;
 }

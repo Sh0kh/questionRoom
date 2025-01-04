@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import FinishModal from "./FinishModal";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-export default function Header({currectAnswer, incorrectAnswer, data, moduleData, time, module }) {
+export default function Header({ currectAnswer, incorrectAnswer, data, moduleData, time, module }) {
     const [countdown, setCountdown] = useState(Number(time) * 60); // If time is in minutes, convert to seconds
     const [isTimeRunning, setIsTimeRunning] = useState(true); // Timer is running
     const [showFinishButton, setShowFinishButton] = useState(false); // "Finish" button
@@ -10,11 +11,28 @@ export default function Header({currectAnswer, incorrectAnswer, data, moduleData
 
     const navigate = useNavigate()
     useEffect(() => {
-        if(time === undefined){
-            navigate('/warning')
+        if (time === undefined || time === 0) {
+            navigate('/result')
+            CloseTest()
+            localStorage.removeItem('courseId')
         }
         setCountdown(Number(time) * 60);
     }, [time]);
+
+    const CloseTest = async () => {
+        try {
+            await axios.post('/result/close', {}, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                params: {
+                    studentId: localStorage.getItem('userId')
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     useEffect(() => {
         let timer;
@@ -40,6 +58,7 @@ export default function Header({currectAnswer, incorrectAnswer, data, moduleData
         return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`; // Format to "mm:ss"
     };
 
+
     return (
         <>
             <div className="Header z-20 w-[97%] rounded-[10px] bg-[white] p-[20px] fixed shadow-lg shadow-gray-200 top-[10px] left-[20px]">
@@ -51,7 +70,7 @@ export default function Header({currectAnswer, incorrectAnswer, data, moduleData
                         {formatTime(countdown)} {/* Display the countdown in "mm:ss" */}
                     </h1>
                     <div className="flex items-center gap-[20px]">
-                        <button onClick={()=>setFinishModal(true)} className="bg-[red] text-[white] px-[20px] py-[10px] rounded-[5px] border-[2px] border-[red] duration-500 hover:bg-transparent hover:text-[red]">
+                        <button onClick={() => setFinishModal(true)} className="bg-[red] text-[white] px-[20px] py-[10px] rounded-[5px] border-[2px] border-[red] duration-500 hover:bg-transparent hover:text-[red]">
                             Tugatish
                         </button>
                     </div>
@@ -66,7 +85,7 @@ export default function Header({currectAnswer, incorrectAnswer, data, moduleData
                                 <button
                                     key={index}
                                     className={`px-[20px] py-[10px] border-[2px] duration-500 rounded-[10px] border-blue-500
-                                        ${isActive ? 'bg-transparent text-blue-500' : 'hover:bg-transparent hover:text-blue-500 border-blue-500 text-[white] bg-blue-500'}`}
+                                        ${isActive ? 'bg-transparent text-blue-500' : 'border-blue-500 text-[white] bg-blue-500'}`}
                                 >
                                     {i?.name}
                                 </button>
@@ -74,7 +93,7 @@ export default function Header({currectAnswer, incorrectAnswer, data, moduleData
                         })}
                 </div>
             </div>
-            <FinishModal currectAnswer={currectAnswer} incorrectAnswer={incorrectAnswer}  time={time} moduleId={module?.id} isOpen={finishModal} onClose={()=>setFinishModal(false)}/>
+            <FinishModal currectAnswer={currectAnswer} incorrectAnswer={incorrectAnswer} time={time} moduleId={module?.id} isOpen={finishModal} onClose={() => setFinishModal(false)} />
         </>
     );
 }

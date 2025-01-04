@@ -19,7 +19,7 @@ export default function AdminModule() {
         currentPage: 0,
         totalPages: 0,
         totalElements: 0,
-        pageSize: 10
+        pageSize: 5
     });
 
     const getModule = async (page = 0) => {
@@ -77,12 +77,12 @@ export default function AdminModule() {
             <div className="bg-white p-6 rounded-lg shadow-lg shadow-gray-200">
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-[50px]">
-                    <h1 className="text-2xl font-semibold text-gray-800">All Module</h1>
+                    <h1 className="text-2xl font-semibold text-gray-800">Barcha Modular</h1>
                     <button
                         onClick={() => setCreateModal(true)}
                         className="bg-[#272C4B] text-white py-2 px-6 rounded-md text-sm font-medium transition-all hover:bg-[#272c4be3]"
                     >
-                        + Add New Module
+                        Modul yaratish
                     </button>
                 </div>
 
@@ -91,10 +91,10 @@ export default function AdminModule() {
                         <table className="w-full text-left table-auto">
                             <thead>
                                 <tr>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Module Name</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Time Minutes</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Start Date</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Modul nomi</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Modul vaqti</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Yaralgan vaqyi</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Sozlamalar</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -138,7 +138,6 @@ export default function AdminModule() {
                 {/* Pagination Section */}
                 <div className="mt-6 flex justify-between items-center">
                     <div className="text-sm text-gray-600">
-                        Showing {data.length} of {pagination.totalElements} entries
                     </div>
                     <div className="flex items-center space-x-3">
                         <button
@@ -156,7 +155,7 @@ export default function AdminModule() {
 
                         <div className="flex items-center">
                             <div className="w-16 text-center px-2 py-1 border border-gray-300 rounded-md text-sm">
-                                {pagination.currentPage + 1} of {pagination.totalPages}
+                                {pagination.currentPage + 1} / {pagination.totalPages}
                             </div>
                         </div>
 

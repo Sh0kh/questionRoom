@@ -52,14 +52,14 @@ export default function DeleteStudent({ isOpen, onClose, data, refresh }) {
                     </div>
                     <div>
                         <h2 className='text-[#606266] text-center'>
-                            Are you sure you want to delete?
+                            Haqiqatan ham oʻchirib tashlamoqchimisiz ?
                         </h2>
                         <div className='flex items-center justify-center mt-[15px] gap-[20px]'>
                             <button onClick={onClose} className='border-[1px] hover:bg-[#6062665b] duration-500 rounded-[5px] border-[#dcdfe6] text-center py-[9px] px-[15px] text-[#606266] text-[12px]'>
-                                Cancel
+                                Bekor qilish
                             </button>
                             <button onClick={DeleteStudent} className='border-[1px] rounded-[5px] border-[#dcdfe6] bg-[red] text-center py-[9px] px-[15px] text-[white] text-[12px]'>
-                                Acceptance
+                                Qabul qilish
                             </button>
                         </div>
                     </div>

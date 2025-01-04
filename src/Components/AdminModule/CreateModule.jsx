@@ -86,7 +86,7 @@ export default function CreateModule({ refresh, isOpen, onClose }) {
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
                         <h1 className="text-[#272C4B] text-[22px]">
-                            Create module
+                            Modul yaratish
                         </h1>
                         <button onClick={onClose}>
                             <svg className='text-[#5E5C5A] text-[13px]' xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14">
@@ -98,14 +98,14 @@ export default function CreateModule({ refresh, isOpen, onClose }) {
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            label="Name Module"
+                            label="Modul nomi"
                             color="gray"  // Changed to gray for a neutral look
                             type="text"
                             required
                             className="border-black"  // Black border color
                         />
                         <div className='mt-[20px]'>
-                            <Select className="bg-[white]" label="Choose a course" onChange={handleSelectChange}>
+                            <Select className="bg-[white]" label="Kursni tanlang" onChange={handleSelectChange}>
                                 {Array.isArray(courseData) && courseData.map(course => (
                                     <Option key={course.id} value={course.id}>
                                         {course.name}
@@ -118,7 +118,7 @@ export default function CreateModule({ refresh, isOpen, onClose }) {
                             <Input
                                 value={time}
                                 onChange={(e) => setTime(e.target.value)}
-                                label="Time"
+                                label="Test vaqti"
                                 color="gray"  // Changed to gray for a neutral look
                                 type="number"
                                 required
@@ -131,7 +131,7 @@ export default function CreateModule({ refresh, isOpen, onClose }) {
                             color="gray"  // Changed to gray for a neutral button
                             className="bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800"
                         >
-                            Create
+                            Yaratish
                         </Button>
                     </div>
                 </div>

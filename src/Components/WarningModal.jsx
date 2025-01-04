@@ -19,11 +19,24 @@ export default function WarningModal() {
                 className={`Modal2Content ${show ? "open" : ""}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="p-[10px] pb-[30px]">
+                <div className="p-[30px] pb-[30px]">
                     <div>
-                        <p className="text-lg font-medium mb-4">
-                            Убедитесь, что вы решаете задачу самостоятельно и не будете списывать.
+                        <h1 className="text-[20px] mb-[15px]">
+                            Hurmatli talabalar!
+                        </h1>
+                        <p className="text- font-medium mb-4">
+                            Biz sizga shuni eslatmoqchimizki, imtihon vaqtida aldab yoki internetdan yordam olishga yo‘l qo‘yilmaydi. Bu nafaqat sizga, balki siz bilan birga tahsil olayotgan barchaga adolatli shart-sharoit yaratish uchun juda muhimdir.
                         </p>
+                        <p className="text- font-medium mb-4">
+                            Shuningdek, test jarayonida diqqat-e’tiboringizni chalg‘itadigan hech qanday tashqi omillarga berilmasligingiz kerak. Har bir ishtirokchining bilim darajasini adolatli baholash uchun har biringizdan mas’uliyat va halollik talab etiladi.
+                        </p>
+                        <p className="text- font-medium mb-4">
+                            Biz ishonamizki, siz imtihonga yetarli darajada tayyorlanib, o‘zingizning haqiqiy bilimlaringizni namoyon eta olasiz. Sizlarning muvaffaqiyatingiz — bu biz uchun ham faxr manbaidir.
+                        </p>
+                        <p className="text- font-medium mb-4">
+                            Imtihon vaqtida hammadan halollikka rioya qilishni va o‘zingizning bilimlaringizga tayanishingizni so‘raymiz.
+                        </p>
+
                         <div className="flex items-center mb-4">
                             <input
                                 type="checkbox"
@@ -33,7 +46,7 @@ export default function WarningModal() {
                                 className="mr-2"
                             />
                             <label htmlFor="agreement" className="text-sm">
-                                Я обещаю решать задачу самостоятельно.
+                                Misollar o'zim ishlayman
                             </label>
                         </div>
                         <button
@@ -42,7 +55,7 @@ export default function WarningModal() {
                                 }`}
                             disabled={!agreed}
                         >
-                            Продолжить
+                            Davom ettirish
                         </button>
                     </div>
                 </div>

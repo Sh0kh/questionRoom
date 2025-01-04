@@ -1,12 +1,92 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import ReactLoading from 'react-loading';
+
+
 export default function ErrorPage() {
-    return (
-        <div className="Error w-full h-screen flex items-center justify-center bg-gray-100">
-            <div className="flex flex-col items-center">
-                <div className="warning-animation mb-4">
-                    <svg className="text-[100px]" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 11a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1"></path></g></svg>
-                </div>
-                <p className="text-[30px] font-bold text-gray-700">Ошибка</p>
+
+    const [data, setData] = useState()
+    const [loading, setLoading] = useState(true)
+
+    const getResult = async () => {
+        try {
+            const response = await axios.get(`/result/get`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                params: {
+                    studentId: localStorage.getItem('userId')
+                }
+            })
+            setData(response?.data?.object)
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+
+    useEffect(() => {
+        getResult()
+    }, [])
+
+
+
+    if (loading) {
+        return (
+            <div className='flex items-center justify-center h-screen w-full'>
+                <ReactLoading type="spinningBubbles" color="#000" height={100} width={100} />
             </div>
+        );
+    }
+
+
+    return (
+        <div className="Error w-full h-screen p-[30px] bg-gray-100 pb-[400px]">
+            <h1 className="text-center text-[30px]">
+                Natijalar
+            </h1>
+            {data && data?.length > 0 ? (
+                <div className="flex items-center w-full  flex-col gap-[20px] mt-[20px]">
+                    {data?.map((i, index) => (
+                        <div key={index} className="bg-[white] shadow-lg rounded-[10px] p-[10px] w-full">
+                            <div className="flex items-center w-full flex-col gap-[20px] mt-[20px]">
+                                <div className="bg-white rounded-[10px] p-[10px] w-full">
+                                    <h1 className="text-lg font-bold text-gray-800 mb-[10px]">{`Kurs: ${i.courseName}`}</h1>
+                                    <div className="space-y-[10px]">
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-semibold text-gray-800">Modul:</span> {i.moduleName}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-semibold text-gray-800">Talaba ID:</span> {i.entity.studentId}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-semibold text-gray-800">To'g'ri javoblar:</span> {i.entity.correctAnswer}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-semibold text-gray-800">Noto'g'ri javoblar:</span> {i.entity.wrongAnswer}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-semibold text-gray-800">To'g'ri javoblar foizi:</span> {Math.round((i.entity.correctAnswer / (i.entity.correctAnswer + i.entity.wrongAnswer)) * 100)}%
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-semibold text-gray-800">Yaratilgan sana:</span> {i.entity.createdAt.split("T")[0]}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-[white] w-[full] mt-[20px] h-[400px] flex items-center justify-center rounded-[10px]">
+                    <h1>
+                        Ma'lumot yoq
+                    </h1>
+                </div>
+            )}
         </div>
     );
 }

@@ -4,7 +4,9 @@ import WarningModal from "../Components/WarningModal";
 import { useEffect, useState } from "react";
 import QuizCard from "../Components/User/QuizCard";
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import ReactLoading from 'react-loading';
+
 
 
 export default function Home() {
@@ -18,6 +20,8 @@ export default function Home() {
     const moduleId = useSelector((state) => state.counter.moduleId); // Получаем moduleId из Redux
     const count = useSelector((state) => state.counter.value); // Получаем значение счетчика из Redux
     const navigate = useNavigate()
+    const [loading, setLoading] = useState(true)
+
 
 
     const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -28,7 +32,7 @@ export default function Home() {
         setIncorrectAnswers(incorrect);
     };
 
-    
+
 
 
     const getStudent = async () => {
@@ -41,7 +45,7 @@ export default function Home() {
             setUserData(response?.data?.object)
         } catch (error) {
             console.log(error)
-            if(error?.status === 401){
+            if (error?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -62,10 +66,13 @@ export default function Home() {
             setTime(response?.data?.object[moduleId]?.testTimeMinute)
         } catch (error) {
             console.log(error)
-            if(error?.status === 401){
+            if (error?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
+            setCourseData(false)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -83,7 +90,7 @@ export default function Home() {
             setQuizData(response?.data?.object)
         } catch (error) {
             console.log(error)
-            if(error?.status === 401){
+            if (error?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -116,7 +123,30 @@ export default function Home() {
         }
     }, [courseData, moduleId]); // Dependency on courseData
 
+    if (loading) {
+        return (
+            <div className='flex items-center justify-center h-screen w-full'>
+                <ReactLoading type="spinningBubbles" color="#000" height={100} width={100} />
+            </div>
+        );
+    }
 
+    if (courseData === false) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center p-[30px]">
+                <div className="bg-[white] rounded-[20px] w-[100%] flex items-center justify-center h-[500px]">
+                    <div>
+                        <h1 className="text-[25px]">
+                            Test tugatilgan
+                        </h1>
+                        <NavLink className={'text-center mt-[22px] underline block'} to={'/login'}>
+                            Loginga qaytish
+                        </NavLink>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="pb-[50px] relative h-[100%] bg-cover bg-center bg-no-repeat" >

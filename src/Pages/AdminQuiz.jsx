@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import CreateStudent from "../Components/AdminStudent/CreateStudent";
-import DeleteStudent from "../Components/AdminStudent/DeleteStudent";
+
 
 // Import the Select component from Material Tailwind
 import { Select, Option } from "@material-tailwind/react";
@@ -19,8 +18,8 @@ export default function AdminQuiz() {
     const [quize, setQuize] = useState([])
     const [moduleId, setModuleId] = useState(null)
     const [itemsData, setItemsData] = useState(null)
-    
-    
+
+
 
     const getCourse = async () => {
         try {
@@ -34,7 +33,7 @@ export default function AdminQuiz() {
         } catch (error) {
             console.error(error);
             setCourseData([]); // Set to an empty array in case of an error
-            if(error?.status === 401){
+            if (error?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -56,7 +55,7 @@ export default function AdminQuiz() {
         } catch (error) {
             console.error(error);
             setModuleData([]); // Очистка модулей в случае ошибки
-            if(error?.status === 401){
+            if (error?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -78,7 +77,7 @@ export default function AdminQuiz() {
         } catch (error) {
             console.error(error);
             setQuize([]); // Очистка модулей в случае ошибки
-            if(error?.status === 401){
+            if (error?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -97,14 +96,14 @@ export default function AdminQuiz() {
         <div className="w-full h-screen overflow-y-auto bg-gray-100 p-6 md:p-10">
             <div className="flex items-center justify-between gap-[30px] mb-[30px]">
                 {/* Add Select dropdown here */}
-                <Select className="bg-[white]" label="Choose a course" onChange={(value) => GetModulesByCourse(value)}>
+                <Select className="bg-[white]" label="Kurs" onChange={(value) => GetModulesByCourse(value)}>
                     {Array.isArray(courseData) && courseData.map(course => (
                         <Option key={course.id} value={course.id}>
                             {course.name}
                         </Option>
                     ))}
                 </Select>
-                <Select className="bg-[white]" label="Choose a module" onChange={(value) => GetQuiz(value)}>
+                <Select className="bg-[white]" label="Modul" onChange={(value) => GetQuiz(value)}>
                     {Array.isArray(moduleData) && moduleData.map(module => (
                         <Option key={module.id} value={module.id}>
                             {module.name}
@@ -115,10 +114,10 @@ export default function AdminQuiz() {
             <div className="bg-white p-6 rounded-lg shadow-lg shadow-gray-200">
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-[50px]">
-                    <h1 className="text-2xl font-semibold text-gray-800">All Quiz</h1>
+                    <h1 className="text-2xl font-semibold text-gray-800">Barcha savollar</h1>
                     {moduleId !== null && (
                         <button onClick={() => navigate(`/admin/quiz/create/${moduleId}`)} className="bg-[#272C4B] text-white py-2 px-6 rounded-md text-sm font-medium transition-all hover:bg-[#272c4be3]">
-                            + Add New Quiz
+                            Savol yaratish
                         </button>
                     )}
                 </div>
@@ -128,9 +127,9 @@ export default function AdminQuiz() {
                         <table className="w-full text-left table-auto">
                             <thead>
                                 <tr>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Quiestion</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Question type</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Savol</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Savol turi</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Sozlama</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -158,7 +157,7 @@ export default function AdminQuiz() {
                 ) : (
                     <div className="flex items-center justify-center h-[300px]">
                         <h1>
-                            Empty Data
+                            Ma'lumot yoq
                         </h1>
                     </div>
                 )}
@@ -166,7 +165,7 @@ export default function AdminQuiz() {
                 {/* Table Section */}
 
             </div>
-            <QuizDelete refresh={()=>GetQuiz(moduleId)} data={itemsData} isOpen={deleteCourse} onClose={() => setDeleteCourse(false)} />
+            <QuizDelete refresh={() => GetQuiz(moduleId)} data={itemsData} isOpen={deleteCourse} onClose={() => setDeleteCourse(false)} />
             {/* <EditModule isOpen={editModal} onClose={() => setEditModal(false)} /> */}
         </div>
     );

@@ -53,7 +53,7 @@ export default function CreateCourse({ isOpen, onClose, refresh }) {
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
                         <h1 className="text-[#272C4B] text-[22px]">
-                            Create course
+                            Kurs yaratish
                         </h1>
                         <button onClick={onClose}>
                             <svg className='text-[#5E5C5A] text-[13px]' xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14">
@@ -65,7 +65,7 @@ export default function CreateCourse({ isOpen, onClose, refresh }) {
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            label="Name course"
+                            label="Kurs nomi"
                             color="gray"  // Changed to gray for a neutral look
                             type="text"
                             required
@@ -78,7 +78,7 @@ export default function CreateCourse({ isOpen, onClose, refresh }) {
                             color="gray"  // Changed to gray for a neutral button
                             className="bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800"
                         >
-                            Create
+                            Yaratish
                         </Button>
                     </div>
                 </div>

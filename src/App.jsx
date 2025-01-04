@@ -11,6 +11,8 @@ import AdminStudent from "./Pages/AdminStudent";
 import AdminQuiz from "./Pages/AdminQuiz";
 import QuestionCreate from "./Components/AdminQuiz/QuestionCreate";
 import ErrorPage from "./Pages/ErrorPage";
+import StudentProfile from "./Pages/StudentProfile";
+import QuestionEdit from "./Components/AdminQuiz/QuestionEdit";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
@@ -34,7 +36,7 @@ function App() {
           {/* Main Routes */}
           <Route element={<MainLayout />}>
             <Route index element={<Home />} />
-            <Route path="/warning" element={<ErrorPage />} />
+            <Route path="/result" element={<ErrorPage />} />
           </Route>
 
           {/* Admin Routes - Protected */}
@@ -50,6 +52,8 @@ function App() {
             <Route path="admin/student" element={<AdminStudent />} />
             <Route path="admin/quiz" element={<AdminQuiz />} />
             <Route path="admin/quiz/create/:ID" element={<QuestionCreate />} />
+            <Route path="admin/student/:id" element={<StudentProfile/>}/>
+            {/* <Route path="/question/edit" element={<QuestionEdit/>}/> */}
           </Route>
 
           {/* Catch-all route for undefined paths */}
