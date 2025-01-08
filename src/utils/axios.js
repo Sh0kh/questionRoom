@@ -1,4 +1,4 @@
 import axios from 'axios'
-axios.defaults.baseURL = 'https://fbdc-84-54-71-184.ngrok-free.app/savol/xona/api'
+axios.defaults.baseURL = 'http://185.196.213.159:7080/savol/xona/api'
 
 export default axios
