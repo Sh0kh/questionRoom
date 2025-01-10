@@ -15,6 +15,7 @@ const Sidebar = () => {
             className="fixed flex h-[95%] top-[17px] left-[15px] border-r-[2px]  w-full max-w-[15rem] flex-col bg-[white] rounded-[30px] bg-clip-border p-4 text-gray-700 shadow-xl shadow-blue-gray-900/10 hover:shadow-2xl transition-shadow duration-300 ease-in-out">
             <div className="p-4 mb-2 flex items-center justify-center">
                 <img className="w-[80px]" src={logo} alt="logo" />
+                {/* This is logo */}
             </div>
             <div className="w-full bg-[white] h-[1px]"></div>
             <nav className="flex flex-col gap-1 p-2 font-sans text-base font-normal text-black text-[22px]">
