@@ -11,16 +11,8 @@ export default function Header({ currectAnswer, incorrectAnswer, data, moduleDat
 
     const navigate = useNavigate()
 
-    console.log(time)
 
-    useEffect(() => {
-        if (time === undefined || time === null || time === 0) {
-            navigate('/result')
-            CloseTest()
-            localStorage.removeItem('courseId')
-        }
-        setCountdown(Number(time) * 60);
-    }, [time]);
+
 
     const CloseTest = async () => {
         try {
@@ -60,6 +52,17 @@ export default function Header({ currectAnswer, incorrectAnswer, data, moduleDat
         const secs = seconds % 60;
         return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`; // Format to "mm:ss"
     };
+
+    useEffect(() => {
+        if (time === undefined || time === null || countdown === 0) {
+            navigate('/result')
+            CloseTest()
+            localStorage.removeItem('courseId')
+        }
+        setCountdown(Number(time) * 60);
+    }, [time, countdown]);
+
+    
 
 
     return (
