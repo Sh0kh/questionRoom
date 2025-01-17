@@ -10,7 +10,6 @@ export default function QuestionEdit({ isOpen, onClose, data }) {
     const [questionOptions, setQuestionOptions] = useState([]) // Now just an array of strings
     const [currentAnswer, setCurrentAnswer] = useState('')
 
-    console.log(data);
 
     useEffect(() => {
         setQuestion(data?.question || '')

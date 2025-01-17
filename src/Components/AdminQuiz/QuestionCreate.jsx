@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Button, Input, Select, Option } from "@material-tailwind/react";
@@ -15,13 +15,20 @@ export default function QuestionCreate() {
     const [image, setImage] = useState(null);
     const [audio, setAudio] = useState(null);
     const navigate = useNavigate();
-    const [currentAnswer, setCurrentAnswer] = useState("Option 1");
     const { ID } = useParams();
     const [question, setQuestion] = useState('');
     const [file, setFile] = useState(null);
     const [fileId, setFileID] = useState()
 
-    
+
+
+    const [currentAnswer, setCurrentAnswer] = useState(questionOptions[0].text);
+
+    useEffect(() => {
+        // Ensure that the currentAnswer is always set to the first option's text
+        setCurrentAnswer(questionOptions[0]?.text || '');
+    }, [questionOptions]); // This will re-run when questionOptions change
+
     const questionTypes = [
         { value: 'IMAGE_BASED', label: 'Image-Based' },
         { value: 'LISTENING', label: 'Listening' },
