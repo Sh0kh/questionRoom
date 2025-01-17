@@ -6,6 +6,7 @@ import { Select, Option } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import QuizDelete from "../Components/AdminQuiz/QuizDelete";
+import QuestionEdit from "../Components/AdminQuiz/QuestionEdit";
 
 export default function AdminQuiz() {
     const navigate = useNavigate()
@@ -18,6 +19,7 @@ export default function AdminQuiz() {
     const [quize, setQuize] = useState([])
     const [moduleId, setModuleId] = useState(null)
     const [itemsData, setItemsData] = useState(null)
+    const [EditData, setEditData] = useState(null)
 
 
 
@@ -92,6 +94,8 @@ export default function AdminQuiz() {
 
 
 
+
+
     return (
         <div className="w-full h-screen overflow-y-auto bg-gray-100 p-6 md:p-10">
             <div className="flex items-center justify-between gap-[30px] mb-[30px]">
@@ -138,7 +142,7 @@ export default function AdminQuiz() {
                                         <td className="py-3 px-4 text-sm text-gray-800">{course.question}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800">{course.quizType}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800">
-                                            <button onClick={() => { setEditModal(true); }} className="text-blue-600 text-[25px] hover:text-blue-800">
+                                            <button onClick={() => { setEditModal(true); setEditData(course) }} className="text-blue-600 text-[25px] hover:text-blue-800">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
                                                     <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75z"></path>
                                                 </svg>
@@ -161,11 +165,11 @@ export default function AdminQuiz() {
                         </h1>
                     </div>
                 )}
-
                 {/* Table Section */}
 
             </div>
             <QuizDelete refresh={() => GetQuiz(moduleId)} data={itemsData} isOpen={deleteCourse} onClose={() => setDeleteCourse(false)} />
+            <QuestionEdit data={EditData} isOpen={editModal} onClose={() => setEditModal(false)} />
             {/* <EditModule isOpen={editModal} onClose={() => setEditModal(false)} /> */}
         </div>
     );
