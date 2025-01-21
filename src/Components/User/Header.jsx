@@ -59,7 +59,7 @@ export default function Header({ currectAnswer, incorrectAnswer, data, moduleDat
             CloseTest()
             localStorage.removeItem('courseId')
         }
-        setCountdown(Number(time) * 60);
+        // setCountdown(Number(time) * 60);
     }, [time, countdown]);
 
     
