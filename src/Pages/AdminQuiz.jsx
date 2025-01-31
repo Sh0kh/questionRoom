@@ -137,8 +137,9 @@ export default function AdminQuiz() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {quize?.map((course) => (
+                                {quize?.map((course, index) => (
                                     <tr key={course.id} className="border-t border-t-[2px] cursor-pointer hover:bg-gray-50">
+                                        {/* <td className="py-3 px-4 text-sm text-gray-800">{index+1}</td> */}
                                         <td className="py-3 px-4 text-sm text-gray-800">{course.question}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800">{course.quizType}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800">

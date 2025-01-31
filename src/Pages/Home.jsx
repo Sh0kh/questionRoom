@@ -110,9 +110,6 @@ export default function Home() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
 
-        // Cleanup the event listener when the component unmounts
-
-        // Disable right click
         const disableContextMenu = (event) => event.preventDefault();
         window.addEventListener("contextmenu", disableContextMenu);
 

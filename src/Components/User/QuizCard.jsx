@@ -1,62 +1,56 @@
 import { Radio } from "@material-tailwind/react";
-import axios from "axios";
-import CONFIG from "../../utils/Config";
 import { useState, useEffect } from "react";
+import CONFIG from "../../utils/Config";
 
 export default function QuizCard({ quizData, onScoreUpdate }) {
     const [selectedOptions, setSelectedOptions] = useState({});
     const [correctAnswers, setCorrectAnswers] = useState(0);
-    const [incorrectAnswers, setIncorrectAnswers] = useState(0);
+    const [incorrectAnswers, setIncorrectAnswers] = useState(quizData.length); // Изначально все ошибки
 
     useEffect(() => {
-        // Передаем значения в отцовский компонент при изменении
+        // Обновляем неправильные ответы как количество неотвеченных + неправильных
+        const unansweredCount = quizData.length - Object.keys(selectedOptions).length;
+        setIncorrectAnswers(unansweredCount + (quizData.length - correctAnswers - unansweredCount));
+
         onScoreUpdate(correctAnswers, incorrectAnswers);
-    }, [correctAnswers, incorrectAnswers, onScoreUpdate]);
+    }, [selectedOptions, correctAnswers, onScoreUpdate]);
 
     const handleRadioChange = (event, questionId, correctAnswer) => {
         const selectedValue = event.target.value;
 
-        if (selectedOptions[questionId] !== selectedValue) {
-            if (selectedValue === correctAnswer) {
-                setCorrectAnswers((prev) => prev + 1);
-                if (selectedOptions[questionId] && selectedOptions[questionId] !== correctAnswer) {
-                    setIncorrectAnswers((prev) => prev - 1);
-                }
-            } else {
-                setIncorrectAnswers((prev) => Math.min(prev + 1, quizData.length - correctAnswers));
-                if (selectedOptions[questionId] === correctAnswer) {
-                    setCorrectAnswers((prev) => prev - 1);
-                }
-            }
+        setSelectedOptions((prevSelectedOptions) => {
+            const updatedOptions = { ...prevSelectedOptions, [questionId]: selectedValue };
 
-            setSelectedOptions((prevSelectedOptions) => ({
-                ...prevSelectedOptions,
-                [questionId]: selectedValue,
-            }));
-        }
+            let newCorrect = 0;
+
+            quizData.forEach((q) => {
+                if (updatedOptions[q.id] === q.correctAnswer) {
+                    newCorrect++;
+                }
+            });
+
+            setCorrectAnswers(newCorrect);
+            return updatedOptions;
+        });
     };
-
-
 
     return (
         <div className="max-w-[1480px] mx-auto">
             {quizData?.map((i, index) => (
                 <div key={i.id} className="bg-white mt-6 p-6 rounded-lg shadow-lg shadow-gray-200">
-                    <h1 className="font-bold text-xl mb-4">
-                        Savol №{index + 1}
-                    </h1>
-                    <h2 className="text-lg mb-6">
-                        {i?.question}
-                    </h2>
-                    {i?.imageId !== null && (
+                    <h1 className="font-bold text-xl mb-4">Savol №{index + 1}</h1>
+                    <h2 className="text-lg mb-6">{i?.question}</h2>
+
+                    {i?.imageId && (
                         <div className="flex items-center justify-center">
-                            <img className="w-[600px] mx-a" src={CONFIG.API_URL + i?.imageId} />
+                            <img className="w-[600px] mx-auto" src={CONFIG.API_URL + i.imageId} alt="Question" />
                         </div>
                     )}
-                    {i?.audioId !== null && (
+
+                    {i?.audioId && (
                         <div className="flex items-center justify-center">
                             <audio controls className="w-[600px] mx-auto">
-                                <source src={CONFIG.API_URL + i?.audioId} type="audio/mpeg" />
+                                <source src={CONFIG.API_URL + i.audioId} type="audio/mpeg" />
                             </audio>
                         </div>
                     )}
