@@ -1,12 +1,15 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import ReactLoading from 'react-loading';
+import { Button } from '@material-tailwind/react';
+import { useNavigate } from "react-router-dom";
 
 
 export default function ErrorPage() {
 
     const [data, setData] = useState()
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
 
     const getResult = async () => {
         try {
@@ -42,11 +45,21 @@ export default function ErrorPage() {
     }
 
 
+
     return (
         <div className="Error w-full h-screen p-[30px] bg-gray-100 pb-[400px]">
-            <h1 className="text-center text-[30px]">
-                Natijalar
-            </h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-center text-[30px]">
+                    Natijalar
+                </h1>
+                <Button
+                    color="gray"
+                    onClick={() => { localStorage.clear(); navigate('/login') }}
+                    className="bg-black text-white hover:bg-gray-800"
+                >
+                    Qayta boshlang
+                </Button>
+            </div>
             {data && data?.length > 0 ? (
                 <div className="flex items-center w-full  flex-col gap-[20px] mt-[20px]">
                     {data?.map((i, index) => (
