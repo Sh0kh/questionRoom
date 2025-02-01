@@ -1,27 +1,40 @@
-import { Button, Input, Select, Option } from '@material-tailwind/react';
+import { Button, Input, Select, Option, Textarea } from '@material-tailwind/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
-
-
+import Select2 from 'react-select';
 
 export default function CreateStudent({ isOpen, onClose, refresh }) {
-    const [courseId, setCourseId] = useState('')
-    const [courseData, setCourseData] = useState([])
-    const [dataBirth, setDataBirth] = useState('')
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [phoneNumber, setPhoneNumber] = useState('')
-    const [password, setPassword] = useState()
-    const [gender, setGender] = useState(null)
-    const [Group, setGroup] = useState(null)
-    const [school, setSchool] = useState('')
-    const [email, setEmail] = useState('')
+    const [courseId, setCourseId] = useState(null);
+    const [courseData, setCourseData] = useState([]);
+    const [dataBirth, setDataBirth] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [password, setPassword] = useState();
+    const [gender, setGender] = useState(null);
+    const [Group, setGroup] = useState(null);
+    const [school, setSchool] = useState('');
+    const [email, setEmail] = useState('');
+    const [address, setAddress] = useState(''); // Add address state
 
+    const resetForm = () => {
+        setLastName('');
+        setFirstName('');
+        setDataBirth('');
+        setPassword('');
+        setCourseId(null);
+        setGroup('');
+        setGender(null);
+        setSchool('');
+        setPhoneNumber('');
+        setEmail('');
+        setAddress(''); // Reset address field
+    };
 
     const getCourse = async () => {
         try {
-            const response = await axios.get(`/course/get/all`, {
+            const response = await axios.get('/course/get/all', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -30,21 +43,34 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
             setCourseData(courses);
         } catch (error) {
             console.error(error);
-            setCourseData([]); // Set to an empty array in case of an error
+            setCourseData([]);
         }
     };
 
     useEffect(() => {
         if (isOpen) {
-            getCourse()
+            getCourse();
         }
-    }, [isOpen])
+    }, [isOpen]);
 
     const createStudent = async () => {
+        if (!courseId) {
+            return Swal.fire({
+                title: 'Error!',
+                text: "Kurs tanlanmagan",
+                icon: 'error',
+                position: 'top-end',
+                timer: 3000,
+                timerProgressBar: true,
+                showCloseButton: true,
+                toast: true,
+                showConfirmButton: false,
+            });
+        }
         try {
             const newData = {
                 accountType: 'STUDENT',
-                courseId: courseId,
+                courseId: courseId?.value,
                 creatorId: localStorage.getItem('userId'),
                 dateBirth: dataBirth,
                 firstName: firstName,
@@ -52,24 +78,20 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                 phoneNumber: phoneNumber,
                 password: password,
                 gender: gender,
-                group: Group,
-                email:email,
-                school:school
-            }
-            const response = await axios.post(`users/admin`, newData, {
+                group: String(Group),
+                email: email,
+                school: school,
+                address: address, // Include address field
+            };
+            const response = await axios.post('/users/admin', newData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-            })
-
-            onClose()
-            setLastName('')
-            setFirstName('')
-            setDataBirth('')
-            setPassword('')
-            setCourseId(''); // Сбрасываем выбранное значение
-            setPhoneNumber('')
-            refresh()
+            });
+            getCourse();
+            onClose();
+            resetForm();
+            refresh();
             Swal.fire({
                 title: 'Muvaffaqiyatli!',
                 icon: 'success',
@@ -80,7 +102,6 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                 toast: true,
                 showConfirmButton: false,
             });
-
         } catch (error) {
             Swal.fire({
                 title: 'Error!',
@@ -94,28 +115,29 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                 showConfirmButton: false,
             });
         }
-    }
-
+    };
 
     useEffect(() => {
         if (!isOpen) {
-            setCourseId(''); // Сбрасываем курс при закрытии модального окна
+            resetForm();
         }
     }, [isOpen]);
 
-    const handleSelectChange = (value) => {
-        setCourseId(value);
+    const handleSelectChange = (selectedOption) => {
+        setCourseId(selectedOption)
     };
 
+    const courseOptions = courseData.map(course => ({
+        value: course.id,
+        label: course.name
+    }));
 
     return (
-        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose} >
-            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()} >
+        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose}>
+            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()}>
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
-                        <h1 className="text-[#272C4B] text-[22px]">
-                            Talaba yaratish
-                        </h1>
+                        <h1 className="text-[#272C4B] text-[22px]">Talaba yaratish</h1>
                         <button onClick={onClose}>
                             <svg className='text-[#5E5C5A] text-[13px]' xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14">
                                 <path fill="currentColor" fillRule="evenodd" d="M1.707.293A1 1 0 0 0 .293 1.707L5.586 7L.293 12.293a1 1 0 1 0 1.414 1.414L7 8.414l5.293 5.293a1 1 0 0 0 1.414-1.414L8.414 7l5.293-5.293A1 1 0 0 0 12.293.293L7 5.586z" clipRule="evenodd"></path>
@@ -128,30 +150,29 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                                 label="Ism"
-                                color="gray"  // Changed to gray for a neutral look
+                                color="gray"
                                 type="text"
                                 required
-                                className="border-black"  // Black border color
+                                className="border-black"
                             />
                             <Input
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                                 label="Familiya"
-                                color="gray"  // Changed to gray for a neutral look
+                                color="gray"
                                 type="text"
                                 required
-                                className="border-black"  // Black border color
+                                className="border-black"
                             />
                         </div>
                         <div className='mt-[20px]'>
-                            <Select
-                                className="bg-[white]" label="Kurs" onChange={handleSelectChange}>
-                                {Array.isArray(courseData) && courseData.map(course => (
-                                    <Option key={course.id} value={course.id}>
-                                        {course.name}
-                                    </Option>
-                                ))}
-                            </Select>
+                            <Select2
+                                options={courseOptions}
+                                onChange={handleSelectChange}
+                                value={courseId}
+                                placeholder="Kursni tanlang"
+                                isClearable
+                            />
                         </div>
                         <div className='flex items-center gap-[10px]'>
                             <div className='mt-[20px] w-full'>
@@ -159,21 +180,21 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                     value={dataBirth}
                                     onChange={(e) => setDataBirth(e.target.value)}
                                     label="Tug'ilgan sana"
-                                    color="gray"  // Changed to gray for a neutral look
+                                    color="gray"
                                     type="date"
                                     required
-                                    className="border-black"  // Black border color
+                                    className="border-black"
                                 />
                             </div>
                             <div className='mt-[20px] w-full'>
-
                                 <Select
                                     className="bg-[white]"
                                     label="Jinsi"
+                                    value={gender}
                                     onChange={(value) => setGender(value)}
                                 >
                                     <Option key="male" value="ERKAK">
-                                        Erkkak
+                                        Erkak
                                     </Option>
                                     <Option key="female" value="AYOL">
                                         Ayol
@@ -187,10 +208,10 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     label="Parol"
-                                    color="gray"  // Changed to gray for a neutral look
+                                    color="gray"
                                     type="text"
                                     required
-                                    className="border-black"  // Black border color
+                                    className="border-black"
                                 />
                             </div>
                             <div className='mt-[20px] w-full'>
@@ -198,10 +219,10 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                     value={Group}
                                     onChange={(e) => setGroup(e.target.value)}
                                     label="Sinif"
-                                    color="gray"  // Changed to gray for a neutral look
-                                    type="text"
+                                    color="gray"
+                                    type="number"
                                     required
-                                    className="border-black"  // Black border color
+                                    className="border-black"
                                 />
                             </div>
                         </div>
@@ -211,10 +232,10 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                     value={school}
                                     onChange={(e) => setSchool(e.target.value)}
                                     label="Maktab"
-                                    color="gray"  // Changed to gray for a neutral look
+                                    color="gray"
                                     type="text"
                                     required
-                                    className="border-black"  // Black border color
+                                    className="border-black"
                                 />
                             </div>
                             <div className='mt-[20px] w-full'>
@@ -222,10 +243,10 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     label="Email"
-                                    color="gray"  // Changed to gray for a neutral look
+                                    color="gray"
                                     type="text"
                                     required
-                                    className="border-black"  // Black border color
+                                    className="border-black"
                                 />
                             </div>
                         </div>
@@ -234,36 +255,39 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                                 value={phoneNumber}
                                 onChange={(e) => {
                                     const input = e.target.value;
-
-                                    // Удаляем любые символы, кроме цифр
                                     const numericValue = input.replace(/\D/g, "");
-
-                                    // Префикс +998 не должен быть удалён
                                     let formattedValue = "+998";
-
-                                    // Добавляем цифры после +998, но не более 9 символов
                                     if (numericValue.startsWith("998")) {
-                                        formattedValue += numericValue.slice(3, 12); // Убираем "998" из начала
+                                        formattedValue += numericValue.slice(3, 12);
                                     } else {
-                                        formattedValue += numericValue.slice(0, 9); // Просто добавляем оставшиеся цифры
+                                        formattedValue += numericValue.slice(0, 9);
                                     }
-
                                     setPhoneNumber(formattedValue);
                                 }}
                                 label="Telefon raqam"
                                 color="gray"
-                                type="text" // Используем text, чтобы разрешить ввод "+"
+                                type="text"
                                 required
                                 className="border-black"
-                                maxLength={13} // Ограничиваем длину ввода до 13 символов
+                                maxLength={13}
                             />
-
                         </div>
-
+                        <div className='mt-[20px]'>
+                            <Textarea
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                label="Manzil"
+                                color="gray"
+                                required
+                                className="border-black"
+                            />
+                        </div>
+                    </div>
+                    <div className='flex justify-center mt-[20px]'>
                         <Button
                             onClick={createStudent}
                             fullWidth
-                            color="gray"  // Changed to gray for a neutral button
+                            color="gray"
                             className="bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800"
                         >
                             Yaratish
@@ -272,5 +296,5 @@ export default function CreateStudent({ isOpen, onClose, refresh }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }

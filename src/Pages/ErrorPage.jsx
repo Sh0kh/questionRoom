@@ -43,9 +43,6 @@ export default function ErrorPage() {
             </div>
         );
     }
-
-
-
     return (
         <div className="Error w-full h-screen p-[30px] bg-gray-100 pb-[400px]">
             <div className="flex items-center justify-between">

@@ -1,39 +1,36 @@
-import { Button, Input, Select, Option } from '@material-tailwind/react';
+import { Button, Input, Select, Option, Textarea } from '@material-tailwind/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
-
-
 export default function EditStudent({ isOpen, onClose, data, refresh }) {
-    const [courseId, setCourseId] = useState('')
-    const [courseData, setCourseData] = useState([])
-    const [dataBirth, setDataBirth] = useState('')
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [phoneNumber, setPhoneNumber] = useState('')
-    const [password, setPassword] = useState()
-    const [gender, setGender] = useState(null)
-    const [Group, setGroup] = useState(null)
-    const [school, setSchool] = useState('')
-    const [email, setEmail] = useState('')
-
-
-
-    console.log(data)
+    const [courseId, setCourseId] = useState('');
+    const [courseData, setCourseData] = useState([]);
+    const [dataBirth, setDataBirth] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [password, setPassword] = useState();
+    const [gender, setGender] = useState(null);
+    const [Group, setGroup] = useState(null);
+    const [school, setSchool] = useState('');
+    const [email, setEmail] = useState('');
+    const [address, setAddress] = useState(''); // State for the textarea
 
 
     useEffect(() => {
         if (data) {
-            setCourseId(data?.courseId || '')
-            setDataBirth(data?.dataBirth || '')
-            setFirstName(data?.firstName || "")
-            setLastName(data?.lastName || '')
-            setPhoneNumber(data?.phoneNumber || '')
-            setGender(data?.gender || '')
-            setGroup(data?.group || '')
+            setCourseId(data?.courseId || '');
+            setDataBirth(data?.dataBirth || '');
+            setFirstName(data?.firstName || "");
+            setLastName(data?.lastName || '');
+            setPhoneNumber(data?.phoneNumber || '');
+            setGender(data?.gender || '');
+            setGroup(data?.group || '');
+            setSchool(data?.school || '');
+            setAddress(data?.address)
         }
-    }, [data])
+    }, [data]);
 
     const getCourse = async () => {
         try {
@@ -52,9 +49,9 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
 
     useEffect(() => {
         if (isOpen) {
-            getCourse()
+            getCourse();
         }
-    }, [isOpen])
+    }, [isOpen]);
 
     const EditStudent = async () => {
         try {
@@ -71,16 +68,16 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                 group: Group,
                 gender: gender,
                 email: email,
-                school: school
-
-            }
+                school: school,
+                address: address, // Add the additional notes to the data
+            };
             const response = await axios.put(`users/edit`, newData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-            })
-            refresh()
-            onClose()
+            });
+            refresh();
+            onClose();
             Swal.fire({
                 title: 'Muvaffaqiyatli!',
                 icon: 'success',
@@ -91,7 +88,6 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                 toast: true,
                 showConfirmButton: false,
             });
-
         } catch (error) {
             Swal.fire({
                 title: 'Error!',
@@ -105,16 +101,15 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                 showConfirmButton: false,
             });
         }
-    }
+    };
 
     const handleSelectChange = (value) => {
         setCourseId(value);
     };
 
-
     return (
-        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose} >
-            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()} >
+        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose}>
+            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()}>
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
                         <h1 className="text-[#272C4B] text-[22px]">
@@ -170,7 +165,6 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                                 />
                             </div>
                             <div className='mt-[20px] w-full'>
-
                                 <Select
                                     className="bg-[white]"
                                     label="Jinsi"
@@ -240,31 +234,40 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                                 onChange={(e) => {
                                     const input = e.target.value;
 
-                                    // Удаляем любые символы, кроме цифр
+                                    // Remove non-numeric characters
                                     const numericValue = input.replace(/\D/g, "");
 
-                                    // Префикс +998 не должен быть удалён
+                                    // Prefix +998 should not be removed
                                     let formattedValue = "+998";
 
-                                    // Добавляем цифры после +998, но не более 9 символов
+                                    // Add digits after +998, up to 9 digits
                                     if (numericValue.startsWith("998")) {
-                                        formattedValue += numericValue.slice(3, 12); // Убираем "998" из начала
+                                        formattedValue += numericValue.slice(3, 12); // Remove "998" from start
                                     } else {
-                                        formattedValue += numericValue.slice(0, 9); // Просто добавляем оставшиеся цифры
+                                        formattedValue += numericValue.slice(0, 9); // Simply add remaining digits
                                     }
 
                                     setPhoneNumber(formattedValue);
                                 }}
                                 label="Telefon raqam"
                                 color="gray"
-                                type="text" // Используем text, чтобы разрешить ввод "+"
+                                type="text"
                                 required
                                 className="border-black"
-                                maxLength={13} // Ограничиваем длину ввода до 13 символов
+                                maxLength={13} // Limit the input length to 13 characters
                             />
-
                         </div>
 
+                        <div className='mt-[20px]'>
+                            <Textarea
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                label="Manzil"
+                                color="gray"
+                                rows={4} // Makes it a larger text area
+                                className="border-black"  // Black border color
+                            />
+                        </div>
                         <Button
                             onClick={EditStudent}
                             fullWidth
@@ -277,5 +280,5 @@ export default function EditStudent({ isOpen, onClose, data, refresh }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }
