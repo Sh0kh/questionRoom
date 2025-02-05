@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 // Import the Select component from Material Tailwind
 import { Select, Option } from "@material-tailwind/react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import QuizDelete from "../Components/AdminQuiz/QuizDelete";
 import QuestionEdit from "../Components/AdminQuiz/QuestionEdit";
@@ -74,7 +74,6 @@ export default function AdminRating() {
                     moduleId: moduleID
                 }
             });
-            console.log(response)
             const rat = Array.isArray(response?.data?.object) ? response.data.object : [];
             setRating(rat);
         } catch (error) {
@@ -87,7 +86,6 @@ export default function AdminRating() {
         }
     };
 
-    console.log(rating)
 
 
     useEffect(() => {
@@ -141,8 +139,18 @@ export default function AdminRating() {
                             <tbody>
                                 {rating?.map((i, index) => (
                                     <tr key={index.id} className="border-t border-t-[2px] cursor-pointer text-center hover:bg-gray-50">
+
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{index + 1}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.studentName}</td>
+
+                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                            <NavLink
+                                                className="underline"
+                                                to={`/admin/student/${i?.studentId}?firstName=${i.studentName}`}
+                                            >
+                                                {i.studentName}
+                                            </NavLink>
+                                        </td>
+
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.attemptsCount}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.correctPercent}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">
