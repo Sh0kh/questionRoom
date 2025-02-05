@@ -13,6 +13,7 @@ import QuestionCreate from "./Components/AdminQuiz/QuestionCreate";
 import ErrorPage from "./Pages/ErrorPage";
 import StudentProfile from "./Pages/StudentProfile";
 import QuestionEdit from "./Components/AdminQuiz/QuestionEdit";
+import AdminRating from "./Pages/AdminRating";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
@@ -51,6 +52,7 @@ function App() {
             <Route path="admin/course" element={<AdminCourse />} />
             <Route path="admin/student" element={<AdminStudent />} />
             <Route path="admin/quiz" element={<AdminQuiz />} />
+            <Route path="admin/rating" element={<AdminRating />} />
             <Route path="admin/quiz/create/:ID" element={<QuestionCreate />} />
             <Route path="admin/student/:id" element={<StudentProfile/>}/>
             {/* <Route path="/question/edit" element={<QuestionEdit/>}/> */}
