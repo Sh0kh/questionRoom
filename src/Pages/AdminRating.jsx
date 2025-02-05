@@ -131,6 +131,7 @@ export default function AdminRating() {
                                 <tr>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">№</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Ism Familiya</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Urinishlar soni</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Natija %</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Savolar soni</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">To'g'ri javob</th>
@@ -142,6 +143,7 @@ export default function AdminRating() {
                                     <tr key={index.id} className="border-t border-t-[2px] cursor-pointer text-center hover:bg-gray-50">
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{index + 1}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.studentName}</td>
+                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.attemptsCount}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.correctPercent}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">
                                             30
