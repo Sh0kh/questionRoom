@@ -6,7 +6,7 @@ import axios from "axios";
 
 export default function QuestionCreate() {
     const [questionOptions, setQuestionOptions] = useState([
-        { text: "", correctAnswer: true },
+        { text: "", correctAnswer: false },
         { text: "", correctAnswer: false },
         { text: "", correctAnswer: false },
         { text: "", correctAnswer: false },
@@ -18,24 +18,15 @@ export default function QuestionCreate() {
     const { ID } = useParams();
     const [question, setQuestion] = useState('');
     const [file, setFile] = useState(null);
-    const [fileId, setFileID] = useState()
-
-
-
-    const [currentAnswer, setCurrentAnswer] = useState(questionOptions[0].text);
-
-    useEffect(() => {
-        // Ensure that the currentAnswer is always set to the first option's text
-        setCurrentAnswer(questionOptions[0]?.text || '');
-    }, [questionOptions]); // This will re-run when questionOptions change
+    const [fileId, setFileID] = useState();
+    const [currentAnswer, setCurrentAnswer] = useState('');
 
     const questionTypes = [
         { value: 'IMAGE_BASED', label: 'Image-Based' },
         { value: 'LISTENING', label: 'Listening' },
-        { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' }
+        { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
+        { value: 'OPEN_ENDED', label: 'Open-Ended' }
     ];
-
-
 
     const handleAddInput = () => {
         setQuestionOptions([...questionOptions, { text: "", correctAnswer: false }]);
@@ -44,45 +35,57 @@ export default function QuestionCreate() {
     const handleRemoveInput = (index) => {
         const updatedOptions = questionOptions.filter((_, i) => i !== index);
         setQuestionOptions(updatedOptions);
+
+        // If we remove the correct answer, reset currentAnswer
+        if (questionOptions[index].correctAnswer) {
+            setCurrentAnswer('');
+        }
     };
 
     const handleInputChange = (e, index) => {
         const updatedOptions = [...questionOptions];
         updatedOptions[index].text = e.target.value;
+
+        // Update currentAnswer if this option was the correct one
+        if (updatedOptions[index].correctAnswer) {
+            setCurrentAnswer(e.target.value);
+        }
+
         setQuestionOptions(updatedOptions);
     };
 
     const handleCheckboxChange = (index) => {
-        const updatedOptions = questionOptions.map((option, i) => {
-            if (i === index) {
-                setCurrentAnswer(option.text);
-                return { ...option, correctAnswer: true };
-            } else {
-                return { ...option, correctAnswer: false };
-            }
-        });
+        const updatedOptions = questionOptions.map((option, i) => ({
+            ...option,
+            correctAnswer: i === index
+        }));
+
+        // Set the current answer to the newly selected option
+        setCurrentAnswer(questionOptions[index].text);
         setQuestionOptions(updatedOptions);
+    };
+
+    const handleOpenEndedAnswerChange = (e) => {
+        setCurrentAnswer(e.target.value);
     };
 
     const handleAudioChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
             setAudio(URL.createObjectURL(file));
-            const uploadedImageId = await uploadFile(file); // Загружаем файл
-            setFile(uploadedImageId); // Сохраняем ID для использования в CreateQuestion
+            const uploadedImageId = await uploadFile(file);
+            setFile(uploadedImageId);
         }
     };
-
 
     const handleImageChange = async (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
-            setImage(URL.createObjectURL(selectedFile)); // Для предпросмотра
-            const uploadedImageId = await uploadFile(selectedFile); // Загружаем файл
-            setFileID(uploadedImageId); // Сохраняем ID для использования в CreateQuestion
+            setImage(URL.createObjectURL(selectedFile));
+            const uploadedImageId = await uploadFile(selectedFile);
+            setFileID(uploadedImageId);
         }
     };
-
 
     const triggerImageFileInput = () => {
         document.getElementById('image-upload-input').click();
@@ -108,10 +111,7 @@ export default function QuestionCreate() {
                 },
             });
 
-            console.log(response)
             return response?.data?.object.id;
-            // setFileID(uploadedFileId); // Обновляем состояние
-            // return uploadedFileId;
         } catch (error) {
             Swal.fire({
                 title: "Error!",
@@ -128,25 +128,43 @@ export default function QuestionCreate() {
         }
     };
 
-
     const CreateQuiz = async () => {
+        // Validate that an answer is selected
+        if (!currentAnswer) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Select answer',
+                icon: 'error',
+                position: 'top-end',
+                timer: 3000,
+                timerProgressBar: true,
+                showCloseButton: true,
+                toast: true,
+                showConfirmButton: false,
+            });
+            return;
+        }
+
         try {
             const newData = {
-                question: question, // Текст вопроса
-                quizType: selectedQuestionType, // Тип вопроса
-                option: questionOptions.map(option => option.text), // Опции для вопроса
-                correctAnswer: currentAnswer, // Верный ответ (можно передавать только название правильного варианта)
+                question: question,
+                quizType: selectedQuestionType,
+                option: selectedQuestionType === 'OPEN_ENDED' ? [] : questionOptions.map(option => option.text),
+                correctAnswer: selectedQuestionType === 'OPEN_ENDED' ? currentAnswer.toLowerCase().replace(/\s/g, "") : currentAnswer,
                 imageId: fileId || null,
                 moduleId: Number(ID),
                 audioId: file || null,
                 createdBy: localStorage.getItem('userId')
-            }
+            };
+
             const response = await axios.post(`/quiz/create`, newData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 }
-            })
-            navigate(-1)
+            });
+
+            navigate(-1);
+
             Swal.fire({
                 title: 'Muvaffaqiyatli!',
                 icon: 'success',
@@ -157,6 +175,7 @@ export default function QuestionCreate() {
                 toast: true,
                 showConfirmButton: false,
             });
+
         } catch (error) {
             Swal.fire({
                 title: 'Error!',
@@ -170,7 +189,7 @@ export default function QuestionCreate() {
                 showConfirmButton: false,
             });
         }
-    }
+    };
 
     return (
         <div className="w-full h-screen bg-gray-100 p-6 md:p-10 overflow-y-auto">
@@ -214,42 +233,55 @@ export default function QuestionCreate() {
                     />
                 </div>
 
-                <div className="mb-4">
-                    <label className="block text-lg font-medium mb-2">Variantlar</label>
-                    {questionOptions.map((option, index) => (
-                        <div key={index} className="flex items-center mb-4">
-                            <Input
-                                type="text"
-                                label={`Variant ${index + 1}`}
-                                value={option.text}
-                                onChange={(e) => handleInputChange(e, index)}
-                                className="mr-2 w-full"
-                            />
-                            <Button
-                                onClick={() => handleRemoveInput(index)}
-                                color="red"
-                                variant="filled"
-                                className="px-4 py-2"
-                            >
-                                -
-                            </Button>
-                            <input
-                                type="checkbox"
-                                checked={option.correctAnswer}
-                                onChange={() => handleCheckboxChange(index)}
-                                className="ml-2"
-                            />
-                        </div>
-                    ))}
-                    <Button
-                        onClick={handleAddInput}
-                        color="green"
-                        variant="filled"
-                        className="w-full px-4 py-2"
-                    >
-                        Variant qoshish
-                    </Button>
-                </div>
+                {selectedQuestionType === "OPEN_ENDED" ? (
+                    <div className="mb-4">
+                        <label className="block text-lg font-medium mb-2">Javob</label>
+                        <Input
+                            type="text"
+                            label="Javob"
+                            value={currentAnswer}
+                            onChange={handleOpenEndedAnswerChange}
+                            className="w-full"
+                        />
+                    </div>
+                ) : (
+                    <div className="mb-4">
+                        <label className="block text-lg font-medium mb-2">Variantlar</label>
+                        {questionOptions.map((option, index) => (
+                            <div key={index} className="flex items-center mb-4">
+                                <Input
+                                    type="text"
+                                    label={`Variant ${index + 1}`}
+                                    value={option.text}
+                                    onChange={(e) => handleInputChange(e, index)}
+                                    className="mr-2 w-full"
+                                />
+                                <Button
+                                    onClick={() => handleRemoveInput(index)}
+                                    color="red"
+                                    variant="filled"
+                                    className="px-4 py-2"
+                                >
+                                    -
+                                </Button>
+                                <input
+                                    type="checkbox"
+                                    checked={option.correctAnswer}
+                                    onChange={() => handleCheckboxChange(index)}
+                                    className="ml-2"
+                                />
+                            </div>
+                        ))}
+                        <Button
+                            onClick={handleAddInput}
+                            color="green"
+                            variant="filled"
+                            className="w-full px-4 py-2"
+                        >
+                            Variant qoshish
+                        </Button>
+                    </div>
+                )}
 
                 {selectedQuestionType === 'IMAGE_BASED' && (
                     <div className="mb-4">

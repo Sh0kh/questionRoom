@@ -10,6 +10,7 @@ export default function QuestionEdit({ isOpen, onClose, data }) {
     const [questionOptions, setQuestionOptions] = useState([]) // Now just an array of strings
     const [currentAnswer, setCurrentAnswer] = useState('')
 
+    console.log(data)
 
     useEffect(() => {
         setQuestion(data?.question || '')
@@ -29,13 +30,17 @@ export default function QuestionEdit({ isOpen, onClose, data }) {
         updatedOptions[index] = e.target.value;
         setQuestionOptions(updatedOptions);
     }
+    const handleOpenEndedAnswerChange = (e) => {
+        setCurrentAnswer(e.target.value);
+    };
+
 
 
     const EditQuestion = async () => {
         try {
             const editData = {
                 audioId: data?.audioId,
-                correctAnswer: currentAnswer,
+                correctAnswer: data?.quizType === "OPEN_ENDED" ? currentAnswer.toLowerCase().replace(/\s/g, "") : '',
                 createdBy: localStorage.getItem('userId'),
                 id: data?.id,
                 imageId: data?.imageId,
@@ -100,32 +105,45 @@ export default function QuestionEdit({ isOpen, onClose, data }) {
                                 className="w-full"
                             />
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-lg font-medium mb-2">Variantlar</label>
-                            {questionOptions?.map((option, index) => (
-                                <div key={index} className="flex items-center mb-4">
-                                    <Input
-                                        type="text"
-                                        label={`Variant ${index + 1}`}
-                                        value={option} // Just the option value now
-                                        onChange={(e) => handleInputChange(e, index)}
-                                        className="mr-2 w-full"
-                                    />
-                                    <input
-                                        type="checkbox"
-                                        checked={option === currentAnswer} // Check if this option is the selected one
-                                        onChange={() => handleCheckboxChange(index)} // Select this option
-                                        className="ml-2"
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                        {data?.quizType === "OPEN_ENDED" ? (
+                            <div className="mb-4">
+                                <label className="block text-lg font-medium mb-2">Javob</label>
+                                <Input
+                                    type="text"
+                                    label="Javob"
+                                    value={currentAnswer}
+                                    onChange={handleOpenEndedAnswerChange}
+                                    className="w-full"
+                                />
+                            </div>
+                        ) : (
+                            <div className="mb-4">
+                                <label className="block text-lg font-medium mb-2">Variantlar</label>
+                                {questionOptions?.map((option, index) => (
+                                    <div key={index} className="flex items-center mb-4">
+                                        <Input
+                                            type="text"
+                                            label={`Variant ${index + 1}`}
+                                            value={option} // Just the option value now
+                                            onChange={(e) => handleInputChange(e, index)}
+                                            className="mr-2 w-full"
+                                        />
+                                        <input
+                                            type="checkbox"
+                                            checked={option === currentAnswer} // Check if this option is the selected one
+                                            onChange={() => handleCheckboxChange(index)} // Select this option
+                                            className="ml-2"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                         <Button onClick={EditQuestion}>
                             O'zgartirish
                         </Button>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }

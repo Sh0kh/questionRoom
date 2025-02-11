@@ -156,6 +156,7 @@ export default function Home() {
                         <NavLink className={'text-center mt-[22px] underline block'} to={'/login'}>
                             Loginga qaytish
                         </NavLink>
+      
                     </div>
                 </div>
             </div>
