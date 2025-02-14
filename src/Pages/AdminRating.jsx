@@ -129,6 +129,7 @@ export default function AdminRating() {
                                 <tr>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">№</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Ism Familiya</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Tel</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Urinishlar soni</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Natija %</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Savolar soni</th>
@@ -151,6 +152,7 @@ export default function AdminRating() {
                                             </NavLink>
                                         </td>
 
+                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.studentPhone}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.attemptsCount}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.correctPercent}</td>
                                         <td className="py-3 px-4 text-sm text-gray-800 text-center">
