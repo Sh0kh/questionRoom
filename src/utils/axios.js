@@ -1,5 +1,5 @@
 import axios from 'axios'
-axios.defaults.baseURL = 'http://194.87.151.210:7080/savol/xona/api'
+axios.defaults.baseURL = 'https://office-project.uz/savol/xona/api'
 
 export default axios
 
