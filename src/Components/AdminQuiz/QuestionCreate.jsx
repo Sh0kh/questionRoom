@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import { Button, Input, Select, Option } from "@material-tailwind/react";
+import { Button, Input, Select, Option, Textarea } from "@material-tailwind/react";
 import axios from "axios";
 
 export default function QuestionCreate() {
@@ -25,7 +25,8 @@ export default function QuestionCreate() {
         { value: 'IMAGE_BASED', label: 'Image-Based' },
         { value: 'LISTENING', label: 'Listening' },
         { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
-        { value: 'OPEN_ENDED', label: 'Open-Ended' }
+        { value: 'OPEN_ENDED', label: 'Open-Ended' },
+        { value: 'AI', label: 'AI' } // New AI type
     ];
 
     const handleAddInput = () => {
@@ -129,8 +130,8 @@ export default function QuestionCreate() {
     };
 
     const CreateQuiz = async () => {
-        // Validate that an answer is selected
-        if (!currentAnswer) {
+        // Validate that an answer is selected for non-AI types
+        if (selectedQuestionType !== 'AI' && !currentAnswer) {
             Swal.fire({
                 title: 'Error!',
                 text: 'Select answer',
@@ -149,8 +150,9 @@ export default function QuestionCreate() {
             const newData = {
                 question: question,
                 quizType: selectedQuestionType,
-                option: selectedQuestionType === 'OPEN_ENDED' ? [] : questionOptions.map(option => option.text),
-                correctAnswer: selectedQuestionType === 'OPEN_ENDED' ? currentAnswer.toLowerCase().replace(/\s/g, "") : currentAnswer,
+                option: selectedQuestionType === 'OPEN_ENDED' || selectedQuestionType === 'AI' ? [] : questionOptions.map(option => option.text),
+                correctAnswer: selectedQuestionType === 'OPEN_ENDED' ? currentAnswer.toLowerCase().replace(/\s/g, "") : 
+                              selectedQuestionType === 'AI' ? '' : currentAnswer,
                 imageId: fileId || null,
                 moduleId: Number(ID),
                 audioId: file || null,
@@ -244,7 +246,7 @@ export default function QuestionCreate() {
                             className="w-full"
                         />
                     </div>
-                ) : (
+                ) : selectedQuestionType && selectedQuestionType !== "OPEN_ENDED" && selectedQuestionType !== "AI" ? (
                     <div className="mb-4">
                         <label className="block text-lg font-medium mb-2">Variantlar</label>
                         {questionOptions.map((option, index) => (
@@ -281,7 +283,7 @@ export default function QuestionCreate() {
                             Variant qoshish
                         </Button>
                     </div>
-                )}
+                ) : null}
 
                 {selectedQuestionType === 'IMAGE_BASED' && (
                     <div className="mb-4">

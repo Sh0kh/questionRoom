@@ -166,7 +166,7 @@ export default function Home() {
     return (
         <div className="pb-[50px] relative h-[100%] bg-cover bg-center bg-no-repeat" >
             <WarningModal />
-            <Header currectAnswer={correctAnswers} incorrectAnswer={incorrectAnswers} data={userData} moduleData={courseData} time={time} module={courseData[moduleId]} />
+            <Header quizType={quizData[0]?.quizType} currectAnswer={correctAnswers} incorrectAnswer={incorrectAnswers} data={userData} moduleData={courseData} time={time} module={courseData[moduleId]} />
             <QuizCard onScoreUpdate={handleScoreUpdate} quizData={quizData} />
         </div>
     );

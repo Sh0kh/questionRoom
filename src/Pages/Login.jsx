@@ -28,7 +28,7 @@ const Login = () => {
         if (role === 'ADMIN') {
           navigate('/admin/course')
         } else {
-          navigate('/')
+          navigate('/home')
         }
 
         Swal.fire({

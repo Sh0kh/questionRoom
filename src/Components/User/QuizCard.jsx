@@ -1,28 +1,33 @@
-import { Input, Radio } from "@material-tailwind/react";
+import { Input, Radio, Textarea } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import CONFIG from "../../utils/Config";
+import { useNavigate } from "react-router-dom";
 
 export default function QuizCard({ quizData, onScoreUpdate }) {
     const [selectedOptions, setSelectedOptions] = useState({});
     const [openEndedAnswers, setOpenEndedAnswers] = useState({});
+    const [aiAnswers, setAiAnswers] = useState({});
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [incorrectAnswers, setIncorrectAnswers] = useState(quizData.length);
     const [disabledInputs, setDisabledInputs] = useState({});
+    const [aiLoading, setAiLoading] = useState({});
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const answeredCount = Object.keys(selectedOptions).length + Object.keys(openEndedAnswers).length;
+        const answeredCount = Object.keys(selectedOptions).length + Object.keys(openEndedAnswers).length + Object.keys(aiAnswers).length;
         const unansweredCount = quizData.length - answeredCount;
         setIncorrectAnswers(unansweredCount + (quizData.length - correctAnswers - unansweredCount));
 
         onScoreUpdate(correctAnswers, incorrectAnswers);
-    }, [selectedOptions, openEndedAnswers, correctAnswers, onScoreUpdate]);
+    }, [selectedOptions, openEndedAnswers, aiAnswers, correctAnswers, onScoreUpdate]);
 
     const handleRadioChange = (event, questionId, correctAnswer) => {
         const selectedValue = event.target.value;
 
         setSelectedOptions((prevSelectedOptions) => {
             const updatedOptions = { ...prevSelectedOptions, [questionId]: selectedValue };
-            updateCorrectAnswersCount(updatedOptions, openEndedAnswers);
+            updateCorrectAnswersCount(updatedOptions, openEndedAnswers, aiAnswers);
             return updatedOptions;
         });
     };
@@ -36,15 +41,20 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
         }
     };
 
+    const handleAiInput = (questionId, value) => {
+        if (!disabledInputs[questionId]) {
+            setAiAnswers(prev => ({
+                ...prev,
+                [questionId]: value
+            }));
+        }
+    };
+
     const checkOpenEndedAnswer = (questionId, correctAnswer) => {
-
-
         const userAnswer = openEndedAnswers[questionId] || "";
         const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s/g, "");
         const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s/g, "");
         const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
-
-
 
         setOpenEndedAnswers(prev => ({
             ...prev,
@@ -59,7 +69,102 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
         updateCorrectAnswersCount(selectedOptions, {
             ...openEndedAnswers,
             [`${questionId}_checked`]: isCorrect
-        });
+        }, aiAnswers);
+    };
+
+    const checkAiAnswer = async (questionId) => {
+        const userAnswer = aiAnswers[questionId] || "";
+        if (!userAnswer.trim()) return;
+
+        setAiLoading(prev => ({ ...prev, [questionId]: true }));
+
+        try {
+            const studentId = localStorage.getItem('userId');
+
+            // Первый запрос: проверка ответа
+            const response = await axios.get(
+                '/result/ai/checkUserStudentAnswer',
+                {
+                    params: {
+                        answer: userAnswer,
+                        quizId: questionId,
+                        studentId: studentId
+                    }
+                }
+            );
+
+            const result = response.data;
+
+            // Вспомогательная функция для парсинга полей из object
+            const extractField = (text, label) => {
+                const regex = new RegExp(`${label}:\\s*([^\\n]+)`, 'i');
+                const match = text.match(regex);
+                return match ? match[1].trim() : '';
+            };
+
+            let CEFRLevel = '';
+            let coherence = '';
+            let grammarAccuracy = '';
+            let sentenceComplexity = '';
+            let vocabularyRichness = '';
+
+            if (result.object) {
+                CEFRLevel = (() => {
+                    const match = result.object.match(/Umumiy daraja[:\s]*(.*)/i);
+                    return match ? match[1].trim() : '';
+                })();
+                coherence = extractField(result.object, "Fikr oqimi");
+                grammarAccuracy = extractField(result.object, "Grammatik to'g'rilik");
+                sentenceComplexity = extractField(result.object, "Sintaksis");
+                vocabularyRichness = extractField(result.object, "Lug'at boyligi");
+            }
+
+            await axios.post('/result/ai/create', null, {
+                params: {
+                    CEFRLevel: CEFRLevel || result.CEFRLevel || 3,
+                    coherence: coherence || result.coherence || '',
+                    grammarAccuracy: grammarAccuracy || result.grammarAccuracy || '',
+                    id: result.id || questionId,
+                    quizId: questionId,
+                    sentenceComplexity: sentenceComplexity || result.sentenceComplexity || '',
+                    studentId: studentId,
+                    vocabularyRichness: vocabularyRichness || result.vocabularyRichness || ''
+                }
+            });
+
+            // После успешного сохранения AI-результата — закрыть тест и перейти на страницу результата
+            await axios.post('/result/close', {}, {
+                params: { studentId },
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+            localStorage.removeItem('courseId');
+            navigate('/result');
+
+            const isCorrect = result.isCorrect || result.score > 0.5;
+
+            setAiAnswers(prev => ({
+                ...prev,
+                [`${questionId}_checked`]: isCorrect,
+                [`${questionId}_result`]: result
+            }));
+
+            setDisabledInputs(prev => ({
+                ...prev,
+                [questionId]: true
+            }));
+
+            updateCorrectAnswersCount(selectedOptions, openEndedAnswers, {
+                ...aiAnswers,
+                [`${questionId}_checked`]: isCorrect
+            });
+
+        } catch (error) {
+            console.error('Ошибка при проверке AI ответа:', error);
+        } finally {
+            setAiLoading(prev => ({ ...prev, [questionId]: false }));
+        }
     };
 
     const clearOpenEndedAnswer = (questionId) => {
@@ -73,15 +178,34 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
             [questionId]: false
         }));
 
-        updateCorrectAnswersCount(selectedOptions, newOpenEndedAnswers);
+        updateCorrectAnswersCount(selectedOptions, newOpenEndedAnswers, aiAnswers);
     };
 
-    const updateCorrectAnswersCount = (radioAnswers, openAnswers) => {
+    const clearAiAnswer = (questionId) => {
+        const newAiAnswers = { ...aiAnswers };
+        delete newAiAnswers[questionId];
+        delete newAiAnswers[`${questionId}_checked`];
+        delete newAiAnswers[`${questionId}_result`];
+        setAiAnswers(newAiAnswers);
+
+        setDisabledInputs(prev => ({
+            ...prev,
+            [questionId]: false
+        }));
+
+        updateCorrectAnswersCount(selectedOptions, openEndedAnswers, newAiAnswers);
+    };
+
+    const updateCorrectAnswersCount = (radioAnswers, openAnswers, aiAnswersData) => {
         let newCorrect = 0;
 
         quizData.forEach((q) => {
             if (q.quizType === 'OPEN_ENDED') {
                 if (openAnswers[`${q.id}_checked`]) {
+                    newCorrect++;
+                }
+            } else if (q.quizType === 'AI') {
+                if (aiAnswersData[`${q.id}_checked`]) {
                     newCorrect++;
                 }
             } else {
@@ -151,7 +275,58 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                         </div>
                     )}
 
-                    {i?.quizType !== 'OPEN_ENDED' && (
+                    {i?.quizType === 'AI' && (
+                        <div className="flex flex-col gap-[10px]">
+                            <div className="w-full">
+                                <Textarea
+                                    label="Javobingizni yozing..."
+                                    value={aiAnswers[i.id] || ''}
+                                    onChange={(e) => handleAiInput(i.id, e.target.value)}
+                                    disabled={disabledInputs[i.id]}
+                                    rows={6}
+                                    className={`w-full ${aiAnswers[`${i.id}_checked`] ? 'border-green-500' : ''
+                                        }`}
+                                />
+                            </div>
+                            <div className="flex items-center gap-[10px]">
+                          
+                                <button
+                                    onClick={() => checkAiAnswer(i.id)}
+                                    disabled={disabledInputs[i.id] || aiLoading[i.id] || !aiAnswers[i.id]?.trim()}
+                                    className="px-[20px] py-[10px] rounded-lg bg-blue-500 text-white font-medium 
+                                             transition-all duration-300 hover:bg-blue-600 active:bg-blue-700 
+                                             shadow-md hover:shadow-lg focus:outline-none focus:ring-2 
+                                             focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 
+                                             disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {aiLoading[i.id] ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Tekshirilmoqda...
+                                        </>
+                                    ) : (
+                                        'Tekshirish'
+                                    )}
+                                </button>
+                            </div>
+                            {aiAnswers[`${i.id}_result`] && (
+                                <div className={`mt-2 p-3 rounded-lg ${aiAnswers[`${i.id}_checked`] ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'
+                                    }`}>
+                                    <p className={`font-medium ${aiAnswers[`${i.id}_checked`] ? 'text-green-800' : 'text-red-800'
+                                        }`}>
+                                        {aiAnswers[`${i.id}_checked`] ? 'To\'g\'ri javob!' : 'Noto\'g\'ri javob!'}
+                                    </p>
+                                    {aiAnswers[`${i.id}_result`].feedback && (
+                                        <p className="mt-1 text-gray-700">
+                                            {aiAnswers[`${i.id}_result`].feedback}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {i?.quizType !== 'OPEN_ENDED' && i?.quizType !== 'AI' && (
                         <div className="flex flex-col gap-4">
                             {i?.option?.map((opt, optIndex) => (
                                 <div key={optIndex} className="flex items-center gap-3">

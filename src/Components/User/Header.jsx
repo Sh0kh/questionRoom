@@ -3,7 +3,7 @@ import FinishModal from "./FinishModal";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export default function Header({ currectAnswer, incorrectAnswer, data, moduleData, time, module }) {
+export default function Header({ quizType, currectAnswer, incorrectAnswer, data, moduleData, time, module }) {
     const [countdown, setCountdown] = useState(Number(time) * 60); // If time is in minutes, convert to seconds
     const [isTimeRunning, setIsTimeRunning] = useState(true); // Timer is running
     const [showFinishButton, setShowFinishButton] = useState(false); // "Finish" button
@@ -62,8 +62,8 @@ export default function Header({ currectAnswer, incorrectAnswer, data, moduleDat
         // setCountdown(Number(time) * 60);
     }, [time, countdown]);
 
-    
 
+    console.log(quizType)
 
     return (
         <>
@@ -76,9 +76,11 @@ export default function Header({ currectAnswer, incorrectAnswer, data, moduleDat
                         {formatTime(countdown)} {/* Display the countdown in "mm:ss" */}
                     </h1>
                     <div className="flex items-center gap-[20px]">
-                        <button onClick={() => setFinishModal(true)} className="bg-[red] text-[white] px-[20px] py-[10px] rounded-[5px] border-[2px] border-[red] duration-500 hover:bg-transparent hover:text-[red]">
-                            Tugatish
-                        </button>
+                        {quizType !== 'AI' && (
+                            <button onClick={() => setFinishModal(true)} className="bg-[red] text-[white] px-[20px] py-[10px] rounded-[5px] border-[2px] border-[red] duration-500 hover:bg-transparent hover:text-[red]">
+                                Tugatish
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

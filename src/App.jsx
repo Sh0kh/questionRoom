@@ -14,6 +14,7 @@ import ErrorPage from "./Pages/ErrorPage";
 import StudentProfile from "./Pages/StudentProfile";
 import QuestionEdit from "./Components/AdminQuiz/QuestionEdit";
 import AdminRating from "./Pages/AdminRating";
+import LightningPage from "./Pages/lightningPage";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
@@ -36,10 +37,10 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           {/* Main Routes */}
           <Route element={<MainLayout />}>
-            <Route index element={<Home />} />
+            <Route path="/" element={<LightningPage />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/result" element={<ErrorPage />} />
           </Route>
-
           {/* Admin Routes - Protected */}
           <Route
             element={
@@ -54,10 +55,9 @@ function App() {
             <Route path="admin/quiz" element={<AdminQuiz />} />
             <Route path="admin/rating" element={<AdminRating />} />
             <Route path="admin/quiz/create/:ID" element={<QuestionCreate />} />
-            <Route path="admin/student/:id" element={<StudentProfile/>}/>
+            <Route path="admin/student/:id" element={<StudentProfile />} />
             {/* <Route path="/question/edit" element={<QuestionEdit/>}/> */}
           </Route>
-
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Route>
