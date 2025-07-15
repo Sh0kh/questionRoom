@@ -12,15 +12,42 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
     const [incorrectAnswers, setIncorrectAnswers] = useState(quizData.length);
     const [disabledInputs, setDisabledInputs] = useState({});
     const [aiLoading, setAiLoading] = useState({});
+    const [shuffledQuizData, setShuffledQuizData] = useState([]);
     const navigate = useNavigate();
+
+    // Функция для перемешивания массива
+    const shuffleArray = (array) => {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    };
+
+    // Перемешиваем вопросы и варианты ответов при первом рендере
+    useEffect(() => {
+        if (quizData) {
+            const shuffled = quizData.map(question => {
+                if (question.quizType !== 'OPEN_ENDED' && question.quizType !== 'AI' && question.option) {
+                    return {
+                        ...question,
+                        option: shuffleArray(question.option)
+                    };
+                }
+                return question;
+            });
+            setShuffledQuizData(shuffleArray(shuffled));
+        }
+    }, [quizData]);
 
     useEffect(() => {
         const answeredCount = Object.keys(selectedOptions).length + Object.keys(openEndedAnswers).length + Object.keys(aiAnswers).length;
-        const unansweredCount = quizData.length - answeredCount;
-        setIncorrectAnswers(unansweredCount + (quizData.length - correctAnswers - unansweredCount));
+        const unansweredCount = shuffledQuizData.length - answeredCount;
+        setIncorrectAnswers(unansweredCount + (shuffledQuizData.length - correctAnswers - unansweredCount));
 
         onScoreUpdate(correctAnswers, incorrectAnswers);
-    }, [selectedOptions, openEndedAnswers, aiAnswers, correctAnswers, onScoreUpdate]);
+    }, [selectedOptions, openEndedAnswers, aiAnswers, correctAnswers, onScoreUpdate, shuffledQuizData]);
 
     const handleRadioChange = (event, questionId, correctAnswer) => {
         const selectedValue = event.target.value;
@@ -199,7 +226,7 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
     const updateCorrectAnswersCount = (radioAnswers, openAnswers, aiAnswersData) => {
         let newCorrect = 0;
 
-        quizData.forEach((q) => {
+        shuffledQuizData.forEach((q) => {
             if (q.quizType === 'OPEN_ENDED') {
                 if (openAnswers[`${q.id}_checked`]) {
                     newCorrect++;
@@ -220,7 +247,7 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
 
     return (
         <div className="max-w-[1480px] mx-auto">
-            {quizData?.map((i, index) => (
+            {shuffledQuizData?.map((i, index) => (
                 <div key={i.id} className="bg-white mt-6 p-6 rounded-lg shadow-lg shadow-gray-200">
                     <h1 className="font-bold text-xl mb-4">Savol №{index + 1}</h1>
                     <h2 className="text-lg mb-6">{i?.question}</h2>
@@ -289,7 +316,7 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                                 />
                             </div>
                             <div className="flex items-center gap-[10px]">
-                          
+
                                 <button
                                     onClick={() => checkAiAnswer(i.id)}
                                     disabled={disabledInputs[i.id] || aiLoading[i.id] || !aiAnswers[i.id]?.trim()}
