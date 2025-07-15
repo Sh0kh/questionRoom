@@ -9,7 +9,7 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
     const [openEndedAnswers, setOpenEndedAnswers] = useState({});
     const [aiAnswers, setAiAnswers] = useState({});
     const [correctAnswers, setCorrectAnswers] = useState(0);
-    const [incorrectAnswers, setIncorrectAnswers] = useState(quizData.length);
+    const [incorrectAnswers, setIncorrectAnswers] = useState(0);
     const [disabledInputs, setDisabledInputs] = useState({});
     const [aiLoading, setAiLoading] = useState({});
     const [shuffledQuizData, setShuffledQuizData] = useState([]);
@@ -25,10 +25,22 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
         return newArray;
     };
 
+    // Функция для выбора случайных вопросов
+    const getRandomQuestions = (questions, count) => {
+        if (questions.length <= count) return shuffleArray([...questions]);
+
+        const shuffled = shuffleArray([...questions]);
+        return shuffled.slice(0, count);
+    };
+
     // Перемешиваем вопросы и варианты ответов при первом рендере
     useEffect(() => {
         if (quizData) {
-            const shuffled = quizData.map(question => {
+            // Выбираем 30 случайных вопросов (или меньше, если вопросов меньше 30)
+            const randomQuestions = getRandomQuestions(quizData, 30);
+
+            // Перемешиваем варианты ответов для каждого вопроса
+            const processedQuestions = randomQuestions.map(question => {
                 if (question.quizType !== 'OPEN_ENDED' && question.quizType !== 'AI' && question.option) {
                     return {
                         ...question,
@@ -37,12 +49,16 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                 }
                 return question;
             });
-            setShuffledQuizData(shuffleArray(shuffled));
+
+            setShuffledQuizData(processedQuestions);
+            setIncorrectAnswers(processedQuestions.length);
         }
     }, [quizData]);
 
     useEffect(() => {
-        const answeredCount = Object.keys(selectedOptions).length + Object.keys(openEndedAnswers).length + Object.keys(aiAnswers).length;
+        const answeredCount = Object.keys(selectedOptions).length +
+            Object.keys(openEndedAnswers).length +
+            Object.keys(aiAnswers).length;
         const unansweredCount = shuffledQuizData.length - answeredCount;
         setIncorrectAnswers(unansweredCount + (shuffledQuizData.length - correctAnswers - unansweredCount));
 
@@ -108,7 +124,6 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
         try {
             const studentId = localStorage.getItem('userId');
 
-            // Первый запрос: проверка ответа
             const response = await axios.get(
                 '/result/ai/checkUserStudentAnswer',
                 {
@@ -122,7 +137,6 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
 
             const result = response.data;
 
-            // Вспомогательная функция для парсинга полей из object
             const extractField = (text, label) => {
                 const regex = new RegExp(`${label}:\\s*([^\\n]+)`, 'i');
                 const match = text.match(regex);
@@ -159,7 +173,6 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                 }
             });
 
-            // После успешного сохранения AI-результата — закрыть тест и перейти на страницу результата
             await axios.post('/result/close', {}, {
                 params: { studentId },
                 headers: {
@@ -275,8 +288,7 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                                     value={openEndedAnswers[i.id] || ''}
                                     onChange={(e) => handleOpenEndedInput(i.id, e.target.value)}
                                     disabled={disabledInputs[i.id]}
-                                    className={`w-full ${openEndedAnswers[`${i.id}_checked`] ? 'border-green-500' : ''
-                                        }`}
+                                    className={`w-full ${openEndedAnswers[`${i.id}_checked`] ? 'border-green-500' : ''}`}
                                 />
                             </div>
                             <button
@@ -297,7 +309,9 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                                          focus:ring-green-400 text-[20px] focus:ring-opacity-50 disabled:opacity-50 
                                          disabled:cursor-not-allowed"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path>
+                                </svg>
                             </button>
                         </div>
                     )}
@@ -311,12 +325,10 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                                     onChange={(e) => handleAiInput(i.id, e.target.value)}
                                     disabled={disabledInputs[i.id]}
                                     rows={6}
-                                    className={`w-full ${aiAnswers[`${i.id}_checked`] ? 'border-green-500' : ''
-                                        }`}
+                                    className={`w-full ${aiAnswers[`${i.id}_checked`] ? 'border-green-500' : ''}`}
                                 />
                             </div>
                             <div className="flex items-center gap-[10px]">
-
                                 <button
                                     onClick={() => checkAiAnswer(i.id)}
                                     disabled={disabledInputs[i.id] || aiLoading[i.id] || !aiAnswers[i.id]?.trim()}
@@ -337,10 +349,8 @@ export default function QuizCard({ quizData, onScoreUpdate }) {
                                 </button>
                             </div>
                             {aiAnswers[`${i.id}_result`] && (
-                                <div className={`mt-2 p-3 rounded-lg ${aiAnswers[`${i.id}_checked`] ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'
-                                    }`}>
-                                    <p className={`font-medium ${aiAnswers[`${i.id}_checked`] ? 'text-green-800' : 'text-red-800'
-                                        }`}>
+                                <div className={`mt-2 p-3 rounded-lg ${aiAnswers[`${i.id}_checked`] ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'}`}>
+                                    <p className={`font-medium ${aiAnswers[`${i.id}_checked`] ? 'text-green-800' : 'text-red-800'}`}>
                                         {aiAnswers[`${i.id}_checked`] ? 'To\'g\'ri javob!' : 'Noto\'g\'ri javob!'}
                                     </p>
                                     {aiAnswers[`${i.id}_result`].feedback && (
