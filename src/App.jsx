@@ -15,6 +15,9 @@ import StudentProfile from "./Pages/StudentProfile";
 import QuestionEdit from "./Components/AdminQuiz/QuestionEdit";
 import AdminRating from "./Pages/AdminRating";
 import LightningPage from "./Pages/lightningPage";
+import AdminTest from "./Pages/AdminTest";
+import AdminTestCreate from "./Pages/AdminTestCreate";
+import AdminTestView from "./Pages/AdminTestView";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
@@ -56,6 +59,9 @@ function App() {
             <Route path="admin/rating" element={<AdminRating />} />
             <Route path="admin/quiz/create/:ID" element={<QuestionCreate />} />
             <Route path="admin/student/:id" element={<StudentProfile />} />
+            <Route path="admin/test" element={<AdminTest />} />
+            <Route path="admin/test/create" element={<AdminTestCreate />} />
+            <Route path="admin/test/:ID" element={<AdminTestView />} />
             {/* <Route path="/question/edit" element={<QuestionEdit/>}/> */}
           </Route>
           {/* Catch-all route for undefined paths */}

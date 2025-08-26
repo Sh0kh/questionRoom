@@ -9,6 +9,7 @@ const Sidebar = () => {
     const Menu = location.pathname === '/admin/course';
     const Bg = location.pathname === '/admin/student';
     const quiz = location.pathname === '/admin/quiz';
+    const test = location.pathname === '/admin/test';
     const rating = location.pathname === '/admin/rating';
 
     return (
@@ -73,6 +74,17 @@ const Sidebar = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M14 15q.425 0 .738-.312t.312-.738t-.312-.737T14 12.9t-.737.313t-.313.737t.313.738T14 15m-.75-3.2h1.5q0-.725.15-1.062t.7-.888q.75-.75 1-1.212t.25-1.088q0-1.125-.788-1.837T14 5q-1.025 0-1.787.575T11.15 7.1l1.35.55q.225-.625.613-.937T14 6.4q.6 0 .975.338t.375.912q0 .35-.2.663t-.7.787q-.825.725-1.012 1.138T13.25 11.8M8 18q-.825 0-1.412-.587T6 16V4q0-.825.588-1.412T8 2h12q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-4 4q-.825 0-1.412-.587T2 20V6h2v14h14v2z"></path></svg>
                         </div>
                         Savolar
+                    </div>
+                </NavLink>
+                <NavLink to={'/admin/test'}>
+                    <div
+                        role="button"
+                        className={`flex items-center w-full p-3 leading-tight transition-all rounded-lg outline-none text-start hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900 ${test ? 'bg-blue-gray-50' : ''
+                            }`}
+                    >
+                        <div className="grid mr-4 place-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeWidth={1}><path strokeWidth={1.5} d="M12 2a7.5 7.5 0 0 0-4.8 13.263C8.19 16.089 9 17.21 9 18.5h6c0-1.29.81-2.411 1.8-3.238A7.5 7.5 0 0 0 12 2Z"></path><path strokeLinejoin="round" strokeWidth={1.5} d="M15 18.5H9v2a1.5 1.5 0 0 0 1.5 1.5h3a1.5 1.5 0 0 0 1.5-1.5z"></path><path strokeLinecap="round" strokeWidth={1.5} d="M10 8c0-1.013.895-2 2-2s2 .82 2 1.833c0 .365-.116.705-.317.991C13.085 9.676 12 10.488 12 11.5"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M11.992 14h.009"></path></g></svg>                        </div>
+                        Testlar
                     </div>
                 </NavLink>
                 <NavLink to={'/admin/rating'}>
