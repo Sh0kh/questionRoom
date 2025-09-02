@@ -1,5 +1,5 @@
 import axios from 'axios'
-axios.defaults.baseURL = 'https://13c4df35555e.ngrok-free.app/savol/xona/api'
+axios.defaults.baseURL = 'https://office-project.uz/savol/xona/api'
 
 export default axios
 
