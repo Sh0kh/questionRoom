@@ -20,7 +20,7 @@ import AdminTestCreate from "./Pages/AdminTestCreate";
 import AdminTestView from "./Pages/AdminTestView";
 import AdminUserCreate from "./Pages/AdminUserCreate";
 import AdminGroup from "./Pages/AdminGroup";
-import AdminUserEdit from "./Pages/AdminUseredit";
+import AdminUserEdit from "./Pages/AdminUserEdit";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
