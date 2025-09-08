@@ -1,56 +1,77 @@
-import { Button, Input, Select, Option } from '@material-tailwind/react';
+import { Button, Input } from '@material-tailwind/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-
 export default function CreateModule({ refresh, isOpen, onClose }) {
-    const [courseId, setCourseId] = useState(null)
-    const [courseData, setCourseData] = useState([])
-    const [name, setName] = useState('')
-    const [time, setTime] = useState('')
+    const { ID } = useParams();
+    const [name, setName] = useState('');
+    const [sort, setSort] = useState('');
+    const [file, setFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const getCourse = async () => {
+    const uploadFile = async (file) => {
         try {
-            const response = await axios.get(`/course/get/all`, {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await axios.post(`/file/upload`, formData, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "multipart/form-data",
+                },
+                params: {
+                    category: 'quiz',
+                    userId: localStorage.getItem('userId'),
                 },
             });
-            const courses = Array.isArray(response?.data?.object) ? response.data.object : [];
-            setCourseData(courses);
+
+            return response?.data?.object.id;
         } catch (error) {
-            console.error(error);
-            setCourseData([]); // Set to an empty array in case of an error
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to upload the file.",
+                icon: "error",
+                position: "top-end",
+                timer: 3000,
+                timerProgressBar: true,
+                showCloseButton: true,
+                toast: true,
+                showConfirmButton: false,
+            });
+            return null;
         }
     };
 
-
-    useEffect(() => {
-        if (isOpen) {
-            getCourse()
-        }
-    }, [isOpen])
-
-
     const createModule = async () => {
         try {
+            setLoading(true);
+
+            let iconId = null;
+            if (file) {
+                const uploadedId = await uploadFile(file);
+                if (uploadedId) iconId = uploadedId;
+            }
+
             const newData = {
                 name: name,
-                courseId: courseId,
-                testTimeMinute: time
-            }
+                courseId: ID,
+                iconId: iconId,
+                sort: sort
+            };
 
             await axios.post(`/module/create`, newData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-            })
-            onClose()
-            setName('')
-            setTime('')
-            setCourseId(null)
-            refresh()
+            });
+
+            onClose();
+            setName('');
+            setSort('');
+            setFile(null);
+            refresh();
             Swal.fire({
                 title: 'Muvaffaqiyatli!',
                 icon: 'success',
@@ -73,16 +94,14 @@ export default function CreateModule({ refresh, isOpen, onClose }) {
                 toast: true,
                 showConfirmButton: false,
             });
+        } finally {
+            setLoading(false);
         }
-    }
-
-    const handleSelectChange = (value) => {
-        setCourseId(value)
     };
 
     return (
-        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose} >
-            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()} >
+        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose}>
+            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()}>
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
                         <h1 className="text-[#272C4B] text-[22px]">
@@ -99,43 +118,44 @@ export default function CreateModule({ refresh, isOpen, onClose }) {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             label="Modul nomi"
-                            color="gray"  // Changed to gray for a neutral look
+                            color="gray"
                             type="text"
                             required
-                            className="border-black"  // Black border color
+                            className="border-black"
                         />
-                        <div className='mt-[20px]'>
-                            <Select className="bg-[white]" label="Kursni tanlang" onChange={handleSelectChange}>
-                                {Array.isArray(courseData) && courseData.map(course => (
-                                    <Option key={course.id} value={course.id}>
-                                        {course.name}
-                                    </Option>
-                                ))}
-                            </Select>
 
-                        </div>
                         <div className='mt-[20px]'>
                             <Input
-                                value={time}
-                                onChange={(e) => setTime(e.target.value)}
-                                label="Test vaqti"
-                                color="gray"  // Changed to gray for a neutral look
+                                value={sort}
+                                onChange={(e) => setSort(e.target.value)}
+                                label="Sort"
+                                color="gray"
                                 type="number"
                                 required
-                                className="border-black"  // Black border color
+                                className="border-black"
                             />
                         </div>
+
+                        <div className='mt-[20px]'>
+                            <input
+                                type="file"
+                                onChange={(e) => setFile(e.target.files[0])}
+                                className="w-full border border-gray-300 rounded-md p-2"
+                            />
+                        </div>
+
                         <Button
                             onClick={createModule}
                             fullWidth
-                            color="gray"  // Changed to gray for a neutral button
-                            className="bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800"
+                            disabled={loading}
+                            color="gray"
+                            className={`bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800 ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                         >
-                            Yaratish
+                            {loading ? "Yuklanmoqda..." : "Yaratish"}
                         </Button>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }

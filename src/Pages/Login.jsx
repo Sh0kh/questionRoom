@@ -19,8 +19,7 @@ const Login = () => {
         }
       })
       localStorage.setItem('token', response?.data?.token);
-      localStorage.setItem('courseId', response?.data?.object?.courseId)
-
+      localStorage.setItem('testId', response?.data?.object?.testId)
       const role = response?.data?.object?.accountType
       if (response?.data?.code === 200) {
         localStorage.setItem('userId', response?.data?.object?.id)

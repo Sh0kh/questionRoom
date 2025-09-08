@@ -71,8 +71,9 @@ export default function AdminTestCreate() {
             const modules = Array.isArray(response?.data?.object) ? response.data.object : [];
             setModuleData(modules);
             setQuize([]);
-            setSelectedQuestions([]);
-            setSelectedQuestionIds([]);
+            // Убрали очистку выбранных вопросов
+            // setSelectedQuestions([]);
+            // setSelectedQuestionIds([]);
         } catch (error) {
             console.error(error);
             setModuleData([]);
@@ -99,8 +100,9 @@ export default function AdminTestCreate() {
             });
             const quiz = Array.isArray(response?.data?.object) ? response.data.object : [];
             setQuize(quiz);
-            setSelectedQuestions([]);
-            setSelectedQuestionIds([]);
+            // Убрали очистку выбранных вопросов
+            // setSelectedQuestions([]);
+            // setSelectedQuestionIds([]);
         } catch (error) {
             console.error(error);
             setQuize([]);

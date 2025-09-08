@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-export default function WarningModal() {
+export default function WarningModal({ startExam }) {
     const [show, setShow] = useState(true);
     const [agreed, setAgreed] = useState(false);
 
     const handleContinue = () => {
         if (agreed) {
             setShow(false);
-            console.log("User agreed and continued.");
+            startExam(true);
         } else {
             alert("Пожалуйста, подтвердите, что вы не будете списывать.");
         }

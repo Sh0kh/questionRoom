@@ -3,171 +3,223 @@ import Header from "../Components/User/Header";
 import WarningModal from "../Components/WarningModal";
 import { useEffect, useState } from "react";
 import QuizCard from "../Components/User/QuizCard";
-import { useSelector, useDispatch } from 'react-redux';
 import { NavLink, useNavigate } from "react-router-dom";
-import ReactLoading from 'react-loading';
-
-
+import ReactLoading from "react-loading";
+import Swal from "sweetalert2";
+import FinishModal from "../Components/FinishModal";
 
 export default function Home() {
-
-    const userId = localStorage.getItem('userId')
-    const courseId = localStorage.getItem('courseId')
-    const [userData, setUserData] = useState()
-    const [courseData, setCourseData] = useState('')
-    const [quizData, setQuizData] = useState([])
-    const [time, setTime] = useState(null)
-    const moduleId = useSelector((state) => state.counter.moduleId); // Получаем moduleId из Redux
-    const count = useSelector((state) => state.counter.value); // Получаем значение счетчика из Redux
-    const navigate = useNavigate()
-    const [loading, setLoading] = useState(true)
-
-
-
+    const testId = localStorage.getItem("testId");
+    const [startExam, setStartExam] = useState(false);
+    const [hasShownModal, setHasShownModal] = useState(false);
+    const [Test, setTest] = useState(null);
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [incorrectAnswers, setIncorrectAnswers] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [selectedOptions, setSelectedOptions] = useState({});
+    const [openEndedAnswers, setOpenEndedAnswers] = useState({});
+    const [shuffledQuizData, setShuffledQuizData] = useState([]);
+    const navigate = useNavigate();
+    const [openModal, setOpenModal] = useState(false);
+
+    const getTest = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`/test/get/by/id/for/test`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                params: { id: testId },
+            });
+
+            const test = response?.data?.object;
+            setTest(test);
+
+            const seconds = (test?.testTime || 0) * 60;
+            setTimeLeft(seconds);
+
+            setTotalQuestions(Math.min(test?.quiz?.length || 0, 30));
+            setIncorrectAnswers(Math.min(test?.quiz?.length || 0, 30));
+        } catch (error) {
+            console.log(error);
+            if (error?.status === 401) {
+                navigate("/login");
+                localStorage.clear();
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleScoreUpdate = (correct, incorrect) => {
         setCorrectAnswers(correct);
         setIncorrectAnswers(incorrect);
     };
 
-
-
-
-    const getStudent = async () => {
-        try {
-            const response = await axios.get(`/users/${userId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                }
-            })
-            setUserData(response?.data?.object)
-        } catch (error) {
-            console.log(error)
-            if (error?.status === 401) {
-                navigate('/login')
-                localStorage.clear()
-            }
-        }
-    }
-
-    const getModule = async () => {
-        try {
-            const response = await axios.get(`/module/get`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                params: {
-                    courseId: courseId
-                }
-            })
-            setCourseData(response?.data?.object)
-            setTime(response?.data?.object[moduleId]?.testTimeMinute)
-        } catch (error) {
-            console.log(error)
-            if (error?.status === 401) {
-                navigate('/login')
-                localStorage.clear()
-            }
-            setCourseData(false)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const getQuestion = async () => {
-        try {
-            const response = await axios.get(`/quiz/get/all`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                params: {
-                    quizModuleId: courseData[moduleId]?.id
-                }
-            })
-
-            setQuizData(response?.data?.object)
-        } catch (error) {
-            console.log(error)
-            if (error?.status === 401) {
-                navigate('/login')
-                localStorage.clear()
-            }
-        }
-    }
+    const handleQuizDataUpdate = (selectedOpts, openEndedAns, shuffledData) => {
+        setSelectedOptions(selectedOpts);
+        setOpenEndedAnswers(openEndedAns);
+        setShuffledQuizData(shuffledData);
+    };
 
     useEffect(() => {
-        getStudent()
-        getModule()
-
-        // Add event listener for page unload (refresh or navigate away)
-        const handleBeforeUnload = (event) => {
-            const message = "Are you sure you want to leave? Your progress might not be saved.";
-            event.returnValue = message; // Standard for most browsers
-            return message; // Some browsers might require this
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        const disableContextMenu = (event) => event.preventDefault();
-        window.addEventListener("contextmenu", disableContextMenu);
-
-        // Disable F12 and other developer tools shortcuts
-        const disableDevTools = (event) => {
-            if (event.key === "F12" || (event.ctrlKey && event.shiftKey && event.key === "I")) {
-                event.preventDefault();
-            }
-        };
-        window.addEventListener("keydown", disableDevTools);
-
-        // Cleanup
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-
-            window.removeEventListener("contextmenu", disableContextMenu);
-            window.removeEventListener("keydown", disableDevTools);
-        };
-    }, [moduleId]);
+        if (startExam) {
+            getTest();
+        }
+    }, [startExam]);
 
     useEffect(() => {
-        // Now getQuestion is called only after receiving courseData
-        if (courseData?.length > 0) {
-            getQuestion();
+        if (timeLeft === null || timeLeft <= 0) return;
+
+        const timerId = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timerId);
+                    handleFinishTest();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timerId);
+    }, [timeLeft, navigate]);
+
+    const handleFinishTest = async () => {
+        try {
+            const studentId = localStorage.getItem('userId');
+
+            // Подготавливаем данные для отправки
+            const correctAnswerQuizIds = [];
+            const wrongAnswerQuizIds = [];
+
+            // Проходим по всем вопросам и определяем правильные/неправильные ответы
+            shuffledQuizData.forEach(question => {
+                if (question.quizType === 'OPEN_ENDED') {
+                    const userAnswer = openEndedAnswers[question.id] || "";
+                    const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s/g, "");
+                    const normalizedCorrectAnswer = question.correctAnswer.toLowerCase().replace(/\s/g, "");
+
+                    if (normalizedUserAnswer === normalizedCorrectAnswer) {
+                        correctAnswerQuizIds.push(question.id);
+                    } else {
+                        wrongAnswerQuizIds.push({
+                            quizId: question.id,
+                            wrongAnswer: userAnswer || "No answer"
+                        });
+                    }
+                } else {
+                    const userAnswer = selectedOptions[question.id];
+
+                    if (userAnswer === question.correctAnswer) {
+                        correctAnswerQuizIds.push(question.id);
+                    } else {
+                        wrongAnswerQuizIds.push({
+                            quizId: question.id,
+                            wrongAnswer: userAnswer || "No answer"
+                        });
+                    }
+                }
+            });
+
+            const requestData = {
+                correctAnswerCount: correctAnswerQuizIds.length,
+                correctAnswerQuizIds: correctAnswerQuizIds,
+                wrongAnswerCount: wrongAnswerQuizIds.length,
+                wrongAnswerQuizIds: wrongAnswerQuizIds,
+                studentId: parseInt(studentId),
+                testId: parseInt(testId),
+                isTelegram: Test?.isTelegram || false
+            };
+
+            // Отправляем результаты на сервер
+            await axios.post('/result/close', requestData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+            Swal.fire({
+                title: "Test tugadi!",
+                text: "Natijangiz saqlandi.",
+                icon: "success",
+                confirmButtonText: "OK",
+            }).then(() => {
+                navigate("/login");
+            });
+
+        } catch (error) {
+            console.error('Xatolik test natijalarini yuborishda:', error);
+            Swal.fire({
+                title: "Xatolik",
+                text: "Natijalarni saqlashda xatolik yuz berdi.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
         }
-    }, [courseData, moduleId]); // Dependency on courseData
+    };
+
+    if (!hasShownModal) {
+        return (
+            <WarningModal
+                startExam={() => {
+                    setStartExam(true);
+                    setHasShownModal(true);
+                }}
+            />
+        );
+    }
 
     if (loading) {
         return (
-            <div className='flex items-center justify-center h-screen w-full'>
-                <ReactLoading type="spinningBubbles" color="#000" height={100} width={100} />
+            <div className="flex items-center justify-center h-screen w-full">
+                <ReactLoading
+                    type="spinningBubbles"
+                    color="#000"
+                    height={100}
+                    width={100}
+                />
             </div>
         );
     }
 
-    if (courseData === false) {
+    if (Test === false) {
         return (
             <div className="h-screen w-full flex items-center justify-center p-[30px]">
-                <div className="bg-[white] rounded-[20px] w-[100%] flex items-center justify-center h-[500px]">
+                <div className="bg-white rounded-[20px] w-full flex items-center justify-center h-[500px]">
                     <div>
-                        <h1 className="text-[25px]">
-                            Test tugatilgan
-                        </h1>
-                        <NavLink className={'text-center mt-[22px] underline block'} to={'/login'}>
+                        <h1 className="text-[25px]">Test tugatilgan</h1>
+                        <NavLink
+                            className="text-center mt-[22px] underline block"
+                            to="/login"
+                        >
                             Loginga qaytish
                         </NavLink>
-      
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 
     return (
-        <div className="pb-[50px] relative h-[100%] bg-cover bg-center bg-no-repeat" >
-            <WarningModal />
-            <Header quizType={quizData[0]?.quizType} currectAnswer={correctAnswers} incorrectAnswer={incorrectAnswers} data={userData} moduleData={courseData} time={time} module={courseData[moduleId]} />
-            <QuizCard onScoreUpdate={handleScoreUpdate} quizData={quizData} />
+        <div className="pb-[50px] relative h-full bg-cover bg-center bg-no-repeat">
+            <Header setOpenModal={setOpenModal} timeLeft={timeLeft} />
+            <QuizCard
+                quizData={Test?.quiz}
+                onScoreUpdate={handleScoreUpdate}
+                onQuizDataUpdate={handleQuizDataUpdate}
+                testTime={Test?.testTime}
+                correctAnswers={correctAnswers}
+                incorrectAnswers={incorrectAnswers}
+                totalQuestions={totalQuestions}
+            />
+            <FinishModal
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                onConfirm={handleFinishTest}
+            />
         </div>
     );
 }

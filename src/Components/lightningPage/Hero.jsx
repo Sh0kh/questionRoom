@@ -13,7 +13,9 @@ export default function Hero() {
                     data-aos="zoom-in"
                 >
                     Bilimingizni sinab ko'ring<br />
-                    <span className="text-gray-400">istalgan fan bo'yicha</span>
+                    <span className="text-gray-400">istalgan fan bo'yicha </span>
+                    <br />
+                    <span className="text-gray-400">08.09.2025 15:30 gacha texnik ishlar olib boriladi </span>
                 </h1>
                 <p
                     className="text-lg md:text-xl text-gray-300 mb-8"

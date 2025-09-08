@@ -18,6 +18,9 @@ import LightningPage from "./Pages/lightningPage";
 import AdminTest from "./Pages/AdminTest";
 import AdminTestCreate from "./Pages/AdminTestCreate";
 import AdminTestView from "./Pages/AdminTestView";
+import AdminUserCreate from "./Pages/AdminUserCreate";
+import AdminGroup from "./Pages/AdminGroup";
+import AdminUserEdit from "./Pages/AdminUseredit";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
@@ -52,10 +55,13 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="admin/module" element={<AdminModule />} />
+            <Route path="admin/module/:ID" element={<AdminModule />} />
             <Route path="admin/course" element={<AdminCourse />} />
+            <Route path="admin/group" element={<AdminGroup />} />
             <Route path="admin/student" element={<AdminStudent />} />
-            <Route path="admin/quiz" element={<AdminQuiz />} />
+            <Route path="admin/student/create" element={<AdminUserCreate />} />
+            <Route path="admin/student/edit/:id" element={<AdminUserEdit />} />
+            <Route path="admin/quiz/:ID" element={<AdminQuiz />} />
             <Route path="admin/rating" element={<AdminRating />} />
             <Route path="admin/quiz/create/:ID" element={<QuestionCreate />} />
             <Route path="admin/student/:id" element={<StudentProfile />} />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Button, Input, Select, Option, Textarea } from "@material-tailwind/react";
+import { Editor } from '@tinymce/tinymce-react';
 import axios from "axios";
 
 export default function QuestionCreate() {
@@ -20,6 +21,7 @@ export default function QuestionCreate() {
     const [file, setFile] = useState(null);
     const [fileId, setFileID] = useState();
     const [currentAnswer, setCurrentAnswer] = useState('');
+    const [correctAnswerAiDescription, setCorrectAnswerAiDescription] = useState('');
 
     const questionTypes = [
         { value: 'IMAGE_BASED', label: 'Image-Based' },
@@ -68,6 +70,14 @@ export default function QuestionCreate() {
 
     const handleOpenEndedAnswerChange = (e) => {
         setCurrentAnswer(e.target.value);
+    };
+
+    const handleQuestionEditorChange = (content, editor) => {
+        setQuestion(content);
+    };
+
+    const handleCorrectAnswerAiDescriptionChange = (content, editor) => {
+        setCorrectAnswerAiDescription(content);
     };
 
     const handleAudioChange = async (e) => {
@@ -151,12 +161,13 @@ export default function QuestionCreate() {
                 question: question,
                 quizType: selectedQuestionType,
                 option: selectedQuestionType === 'OPEN_ENDED' || selectedQuestionType === 'AI' ? [] : questionOptions.map(option => option.text),
-                correctAnswer: selectedQuestionType === 'OPEN_ENDED' ? currentAnswer.toLowerCase().replace(/\s/g, "") : 
-                              selectedQuestionType === 'AI' ? '' : currentAnswer,
+                correctAnswer: selectedQuestionType === 'OPEN_ENDED' ? currentAnswer.toLowerCase().replace(/\s/g, "") :
+                    selectedQuestionType === 'AI' ? '' : currentAnswer,
                 imageId: fileId || null,
                 moduleId: Number(ID),
                 audioId: file || null,
-                createdBy: localStorage.getItem('userId')
+                createdBy: localStorage.getItem('userId'),
+                correctAnswerAiDescription: correctAnswerAiDescription
             };
 
             const response = await axios.post(`/quiz/create`, newData, {
@@ -194,46 +205,57 @@ export default function QuestionCreate() {
     };
 
     return (
-        <div className="w-full h-screen bg-gray-100 p-6 md:p-10 overflow-y-auto">
+        <div className="w-full h-screen  px-10 pb-10 mt-5  overflow-y-auto">
             <div className="bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex justify-between mb-4">
                     <h2 className="text-xl font-semibold">Savol yaratish</h2>
-                    <Button
-                        onClick={() => navigate(-1)}
-                        color="gray"
-                        variant="filled"
-                        className="px-4 py-2"
-                    >
-                        Back
-                    </Button>
+                    <div className="flex items-center gap-[10px]">
+                        <Button
+                            onClick={() => navigate(-1)}
+                            color="gray"
+                            variant="filled"
+                            className=""
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            onClick={CreateQuiz}
+                            color="green"
+                            variant="filled"
+                            className=""
+                        >
+                            Yaratish
+                        </Button>
+                    </div>
+                </div>
+                <div className="flex gap-[10px]">
+                    <div className="mb-4 w-[75%] ">
+                        <label className="block text-lg font-medium mb-2">Savol</label>
+                        <Input
+                            type="text"
+                            label="Savol..."
+                            value={question}
+                            onChange={(e) => setQuestion(e.target.value)}
+                            className="w-full"
+                        />
+                    </div>
+                    <div className="mb-4 w-[25%]">
+                        <label className="block text-lg font-medium mb-2">Savol turi</label>
+                        <Select
+                            label="Savol turi"
+                            value={selectedQuestionType}
+                            onChange={(e) => setSelectedQuestionType(e)}
+                            className="w-full"
+                        >
+                            {questionTypes.map((type) => (
+                                <Option key={type.value} value={type.value}>
+                                    {type.label}
+                                </Option>
+                            ))}
+                        </Select>
+                    </div>
                 </div>
 
-                <div className="mb-4">
-                    <label className="block text-lg font-medium mb-2">Savol turi</label>
-                    <Select
-                        label="Savol turi"
-                        value={selectedQuestionType}
-                        onChange={(e) => setSelectedQuestionType(e)}
-                        className="w-full"
-                    >
-                        {questionTypes.map((type) => (
-                            <Option key={type.value} value={type.value}>
-                                {type.label}
-                            </Option>
-                        ))}
-                    </Select>
-                </div>
-
-                <div className="mb-4">
-                    <label className="block text-lg font-medium mb-2">Savol</label>
-                    <Input
-                        type="text"
-                        label="Savol..."
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        className="w-full"
-                    />
-                </div>
 
                 {selectedQuestionType === "OPEN_ENDED" ? (
                     <div className="mb-4">
@@ -249,31 +271,33 @@ export default function QuestionCreate() {
                 ) : selectedQuestionType && selectedQuestionType !== "OPEN_ENDED" && selectedQuestionType !== "AI" ? (
                     <div className="mb-4">
                         <label className="block text-lg font-medium mb-2">Variantlar</label>
-                        {questionOptions.map((option, index) => (
-                            <div key={index} className="flex items-center mb-4">
-                                <Input
-                                    type="text"
-                                    label={`Variant ${index + 1}`}
-                                    value={option.text}
-                                    onChange={(e) => handleInputChange(e, index)}
-                                    className="mr-2 w-full"
-                                />
-                                <Button
-                                    onClick={() => handleRemoveInput(index)}
-                                    color="red"
-                                    variant="filled"
-                                    className="px-4 py-2"
-                                >
-                                    -
-                                </Button>
-                                <input
-                                    type="checkbox"
-                                    checked={option.correctAnswer}
-                                    onChange={() => handleCheckboxChange(index)}
-                                    className="ml-2"
-                                />
-                            </div>
-                        ))}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {questionOptions.map((option, index) => (
+                                <div key={index} className="flex items-center  mb-2">
+                                    <Input
+                                        type="text"
+                                        label={`Variant ${index + 1}`}
+                                        value={option.text}
+                                        onChange={(e) => handleInputChange(e, index)}
+                                        className="mr-2 w-full"
+                                    />
+                                    <Button
+                                        onClick={() => handleRemoveInput(index)}
+                                        color="red"
+                                        variant="filled"
+                                        className="px-4 py-2 ml-2"
+                                    >
+                                        -
+                                    </Button>
+                                    <input
+                                        type="checkbox"
+                                        checked={option.correctAnswer}
+                                        onChange={() => handleCheckboxChange(index)}
+                                        className="ml-2"
+                                    />
+                                </div>
+                            ))}
+                        </div>
                         <Button
                             onClick={handleAddInput}
                             color="green"
@@ -341,14 +365,35 @@ export default function QuestionCreate() {
                     </div>
                 )}
 
-                <Button
-                    onClick={CreateQuiz}
-                    color="green"
-                    variant="filled"
-                    className="w-full mt-4"
-                >
-                    Yaratish
-                </Button>
+                {/* AI Description Field - показывается для всех типов вопросов после выбора типа */}
+                {selectedQuestionType && (
+                    <div className="mb-4">
+                        <label className="block text-lg font-medium mb-2">AI javob tavsifi
+                        </label>
+                        <Editor
+                            apiKey="swbxllpubas9mkbcofu5g23turhtv6yx2bq0ajg10w5d1gol" // Replace with your TinyMCE API key
+                            value={correctAnswerAiDescription}
+                            onEditorChange={handleCorrectAnswerAiDescriptionChange}
+                            init={{
+                                height: 300,
+                                menubar: false,
+                                plugins: [
+                                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                                ],
+                                toolbar: 'undo redo | blocks | ' +
+                                    'bold italic forecolor | alignleft aligncenter ' +
+                                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                                    'removeformat | help',
+                                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                                placeholder: 'AI javob tavsifi'
+                            }}
+                        />
+                    </div>
+                )}
+
+
             </div>
         </div>
     );

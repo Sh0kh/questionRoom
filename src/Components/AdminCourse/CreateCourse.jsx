@@ -1,26 +1,74 @@
-import { Button, Input, } from '@material-tailwind/react';
+import { Button, Input } from '@material-tailwind/react';
 import axios from 'axios';
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 
-
-
 export default function CreateCourse({ isOpen, onClose, refresh }) {
+    const [name, setName] = useState('');
+    const [file, setFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const [name, setName] = useState('')
-    const CreateCourse = async () => {
+    const uploadFile = async (file) => {
         try {
-            const newData = {
-                name: name
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await axios.post(`/file/upload`, formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "multipart/form-data",
+                },
+                params: {
+                    category: 'quiz',
+                    userId: localStorage.getItem('userId'),
+                },
+            });
+
+            return response?.data?.object?.id;
+        } catch (error) {
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to upload the file.",
+                icon: "error",
+                position: "top-end",
+                timer: 3000,
+                timerProgressBar: true,
+                showCloseButton: true,
+                toast: true,
+                showConfirmButton: false,
+            });
+            return null;
+        }
+    };
+
+    const handleCreateCourse = async () => {
+        try {
+            setLoading(true); // включаем загрузку
+
+            let iconId = null;
+            if (file) {
+                iconId = await uploadFile(file);
+                if (!iconId) {
+                    setLoading(false);
+                    return;
+                }
             }
-            const response = await axios.post('course/create', newData, {
+
+            const newData = {
+                name: name,
+                iconId: iconId,
+            };
+
+            await axios.post('course/create', newData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-            })
-            refresh()
-            setName('')
-            onClose()
+            });
+
+            refresh();
+            setName('');
+            setFile(null);
+            onClose();
             Swal.fire({
                 title: 'Muvaffaqiyatli!',
                 icon: 'success',
@@ -43,13 +91,14 @@ export default function CreateCourse({ isOpen, onClose, refresh }) {
                 toast: true,
                 showConfirmButton: false,
             });
+        } finally {
+            setLoading(false); // выключаем загрузку
         }
-    }
-
+    };
 
     return (
-        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose} >
-            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()} >
+        <div className={`modal2 ${isOpen ? "open" : ""}`} onClick={onClose}>
+            <div className={`Modal2Content ${isOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()}>
                 <div className='p-[10px] pb-[30px]'>
                     <div className='flex items-center justify-between pr-[10px] pb-[15px]'>
                         <h1 className="text-[#272C4B] text-[22px]">
@@ -66,23 +115,54 @@ export default function CreateCourse({ isOpen, onClose, refresh }) {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             label="Kurs nomi"
-                            color="gray"  // Changed to gray for a neutral look
+                            color="gray"
                             type="text"
                             required
-                            className="border-black"  // Black border color
+                            className="border-black"
                         />
-    
+
+                        {/* File input */}
+                        <input
+                            type="file"
+                            onChange={(e) => setFile(e.target.files[0])}
+                            className="mt-4"
+                        />
+
                         <Button
-                            onClick={CreateCourse}
+                            onClick={handleCreateCourse}
                             fullWidth
-                            color="gray"  // Changed to gray for a neutral button
-                            className="bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800"
+                            color="gray"
+                            disabled={loading} // блокируем кнопку
+                            className={`bg-[#272C4B] mt-[20px] text-white hover:bg-gray-800 flex items-center justify-center`}
                         >
-                            Yaratish
+                            {loading ? (
+                                <svg
+                                    className="animate-spin h-5 w-5 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v8z"
+                                    ></path>
+                                </svg>
+                            ) : (
+                                "Yaratish"
+                            )}
                         </Button>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
