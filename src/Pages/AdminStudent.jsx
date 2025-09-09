@@ -199,7 +199,6 @@ export default function AdminStudent() {
                                             className="border border-gray-300 focus:border-blue-500 rounded-lg p-2 w-full"
                                         />
                                     </div>
-
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Familiya</label>
                                         <input
@@ -210,7 +209,6 @@ export default function AdminStudent() {
                                             className="border border-gray-300 focus:border-blue-500 rounded-lg p-2 w-full"
                                         />
                                     </div>
-
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Telefon</label>
                                         <input

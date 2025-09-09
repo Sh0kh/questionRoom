@@ -119,9 +119,11 @@ export default function AdminTest() {
                                                 <Eye size={14} /> Ko‘rish
                                             </Button>
                                         </NavLink>
-                                        <Button size="sm" color="green" className="flex items-center gap-1">
-                                            <Pencil size={14} /> Tahrirlash
-                                        </Button>
+                                        <NavLink to={`/admin/test/edit/${item?.id}`}>
+                                            <Button size="sm" color="green" className="flex items-center gap-1 py-[12px]">
+                                                <Pencil size={14} /> Tahrirlash
+                                            </Button>
+                                        </NavLink>
                                         <AdminTestDelete refresh={getAllTest} id={item?.id} />
                                     </div>
                                 </div>

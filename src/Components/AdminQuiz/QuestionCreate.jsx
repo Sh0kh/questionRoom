@@ -28,7 +28,6 @@ export default function QuestionCreate() {
         { value: 'LISTENING', label: 'Listening' },
         { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
         { value: 'OPEN_ENDED', label: 'Open-Ended' },
-        { value: 'AI', label: 'AI' } // New AI type
     ];
 
     const handleAddInput = () => {
@@ -167,7 +166,7 @@ export default function QuestionCreate() {
                 moduleId: Number(ID),
                 audioId: file || null,
                 createdBy: localStorage.getItem('userId'),
-                correctAnswerAiDescription: correctAnswerAiDescription
+                correct_answer_ai_description: correctAnswerAiDescription
             };
 
             const response = await axios.post(`/quiz/create`, newData, {
@@ -175,9 +174,7 @@ export default function QuestionCreate() {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 }
             });
-
             navigate(-1);
-
             Swal.fire({
                 title: 'Muvaffaqiyatli!',
                 icon: 'success',

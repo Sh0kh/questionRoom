@@ -152,7 +152,20 @@ export default function AdminUserCreate() {
                             <Input label="Telefon raqam" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
                             <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} />
                             <Input label="Telegram Chat ID" type="number" name="telegramChatId" value={formData.telegramChatId} onChange={handleChange} />
-                            <Input label="Balans" type="number" name="balance" value={formData.balance} onChange={handleChange} />
+                            <Input
+                                label="Balans"
+                                type="text"
+                                name="balance"
+                                value={formData?.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+                                onChange={(e) =>
+                                    handleChange({
+                                        target: {
+                                            name: "balance",
+                                            value: e.target.value.replace(/\s/g, ""),
+                                        },
+                                    })
+                                }
+                            />
                         </div>
                     </div>
 

@@ -95,34 +95,48 @@ export default function Home() {
             const correctAnswerQuizIds = [];
             const wrongAnswerQuizIds = [];
 
-            // Проходим по всем вопросам и определяем правильные/неправильные ответы
-            shuffledQuizData.forEach(question => {
-                if (question.quizType === 'OPEN_ENDED') {
-                    const userAnswer = openEndedAnswers[question.id] || "";
-                    const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s/g, "");
-                    const normalizedCorrectAnswer = question.correctAnswer.toLowerCase().replace(/\s/g, "");
+            // Проверяем, ответил ли пользователь хотя бы на один вопрос
+            const hasAnsweredAnyQuestion = Object.keys(selectedOptions).length > 0 ||
+                Object.keys(openEndedAnswers).length > 0;
 
-                    if (normalizedUserAnswer === normalizedCorrectAnswer) {
-                        correctAnswerQuizIds.push(question.id);
-                    } else {
-                        wrongAnswerQuizIds.push({
-                            quizId: question.id,
-                            wrongAnswer: userAnswer || "No answer"
-                        });
-                    }
-                } else {
-                    const userAnswer = selectedOptions[question.id];
+            // Если пользователь не ответил ни на один вопрос, помечаем все вопросы как неправильные
+            if (!hasAnsweredAnyQuestion) {
+                shuffledQuizData.forEach(question => {
+                    wrongAnswerQuizIds.push({
+                        quizId: question.id,
+                        wrongAnswer: "No answer"
+                    });
+                });
+            } else {
+                // Обычная логика проверки ответов
+                shuffledQuizData.forEach(question => {
+                    if (question.quizType === 'OPEN_ENDED') {
+                        const userAnswer = openEndedAnswers[question.id] || "";
+                        const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s/g, "");
+                        const normalizedCorrectAnswer = question.correctAnswer.toLowerCase().replace(/\s/g, "");
 
-                    if (userAnswer === question.correctAnswer) {
-                        correctAnswerQuizIds.push(question.id);
+                        if (normalizedUserAnswer === normalizedCorrectAnswer) {
+                            correctAnswerQuizIds.push(question.id);
+                        } else {
+                            wrongAnswerQuizIds.push({
+                                quizId: question.id,
+                                wrongAnswer: userAnswer || "No answer"
+                            });
+                        }
                     } else {
-                        wrongAnswerQuizIds.push({
-                            quizId: question.id,
-                            wrongAnswer: userAnswer || "No answer"
-                        });
+                        const userAnswer = selectedOptions[question.id];
+
+                        if (userAnswer === question.correctAnswer) {
+                            correctAnswerQuizIds.push(question.id);
+                        } else {
+                            wrongAnswerQuizIds.push({
+                                quizId: question.id,
+                                wrongAnswer: userAnswer || "No answer"
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
 
             const requestData = {
                 correctAnswerCount: correctAnswerQuizIds.length,
@@ -135,7 +149,7 @@ export default function Home() {
             };
 
             // Отправляем результаты на сервер
-            await axios.post('/result/close', requestData, {
+            await axios.post('/result/create', requestData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 }
@@ -147,7 +161,7 @@ export default function Home() {
                 icon: "success",
                 confirmButtonText: "OK",
             }).then(() => {
-                navigate("/login");
+                navigate("/result");
             });
 
         } catch (error) {

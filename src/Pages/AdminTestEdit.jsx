@@ -3,11 +3,12 @@ import axios from "axios"
 import { Card, CardBody, Checkbox, Input, Typography, Button } from "@material-tailwind/react";
 import ReactLoading from "react-loading";
 import Swal from 'sweetalert2';
-
+import { useParams } from "react-router-dom";
 
 const useNavigate = () => (path) => console.log('Navigate to:', path);
 
-export default function AdminTestCreate() {
+export default function AdminTestEdit() {
+    const { id } = useParams();
     const navigate = useNavigate()
     const [courseData, setCourseData] = useState([])
     const [moduleData, setModuleData] = useState([])
@@ -22,7 +23,8 @@ export default function AdminTestCreate() {
         courses: false,
         modules: false,
         quizzes: false,
-        questions: false
+        questions: false,
+        test: false
     });
     const [form, setForm] = useState({
         isTelegram: true,
@@ -33,9 +35,46 @@ export default function AdminTestCreate() {
         testTime: '',
     });
 
-
     const handleChange = (field, value) => {
         setForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const getTest = async () => {
+        setLoading(prev => ({ ...prev, test: true }));
+        try {
+            const response = await axios.get(`/test/get/by/id`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                params: { id: id },
+            });
+            const testData = response.data.object;
+
+            // Заполняем форму данными теста
+            setForm({
+                isTelegram: testData.isTelegram,
+                isWeb: testData.isWeb,
+                name: testData.name,
+                price: testData.price.toString(),
+                testCount: testData.testCount.toString(),
+                testTime: testData.testTime.toString(),
+            });
+
+            // Устанавливаем выбранные вопросы
+            if (testData.quiz && testData.quiz.length > 0) {
+                setSelectedQuestionIds(testData.quiz);
+                setSelectedQuestions(testData.quiz);
+            }
+
+        } catch (error) {
+            console.log(error);
+            if (error?.response?.status === 401) {
+                navigate('/login')
+                localStorage.clear()
+            }
+        } finally {
+            setLoading(prev => ({ ...prev, test: false }));
+        }
     };
 
     const getCourse = async () => {
@@ -48,7 +87,7 @@ export default function AdminTestCreate() {
             })
             setCourseData(response?.data?.object || [])
         } catch (error) {
-            if (error?.status === 401) {
+            if (error?.response?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -71,13 +110,10 @@ export default function AdminTestCreate() {
             const modules = Array.isArray(response?.data?.object) ? response.data.object : [];
             setModuleData(modules);
             setQuize([]);
-            // Убрали очистку выбранных вопросов
-            // setSelectedQuestions([]);
-            // setSelectedQuestionIds([]);
         } catch (error) {
             console.error(error);
             setModuleData([]);
-            if (error?.status === 401) {
+            if (error?.response?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -100,13 +136,10 @@ export default function AdminTestCreate() {
             });
             const quiz = Array.isArray(response?.data?.object) ? response.data.object : [];
             setQuize(quiz);
-            // Убрали очистку выбранных вопросов
-            // setSelectedQuestions([]);
-            // setSelectedQuestionIds([]);
         } catch (error) {
             console.error(error);
             setQuize([]);
-            if (error?.status === 401) {
+            if (error?.response?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -130,53 +163,46 @@ export default function AdminTestCreate() {
 
     const handleQuizClick = (quiz) => {
         setSelectedQuiz(quiz);
-        // Сразу добавляем квиз в выбранные вопросы
         setSelectedQuestionIds(prev => {
             if (prev.some(q => q.id === quiz.id)) {
-                // Если уже выбран, удаляем
                 return prev.filter(q => q.id !== quiz.id);
             } else {
-                // Добавляем в выбранные
                 return [...prev, quiz];
             }
         });
-        // Отображаем его в колонке Savollar
-        setSelectedQuestions([quiz]);
     };
 
     const handleQuestionClick = (question) => {
         setSelectedQuestionIds(prev => {
             if (prev.some(q => q.id === question.id)) {
-                // Удаляем вопрос, если уже выбран
                 return prev.filter(q => q.id !== question.id);
             } else {
-                // Добавляем вопрос, если не выбран
                 return [...prev, question];
             }
         });
     };
 
-    const createTest = async () => {
+    const updateTest = async () => {
         try {
             const testData = {
+                id: id,
                 isTelegram: form.isTelegram,
                 isWeb: form.isWeb,
                 name: form.name,
-                price: form.price,
+                price: parseInt(form.price),
                 quizIds: selectedQuestionIds.map(q => q.id),
-                testCount: form.testCount,
-                testTime: form.testTime
+                testCount: parseInt(form.testCount),
+                testTime: parseInt(form.testTime)
             };
 
-            const response = await axios.post(`/test/create`, testData, {
+            const response = await axios.put(`/test/update`, testData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'application/json'
                 },
             });
-
             Swal.fire({
-                title: 'Muvaffaqiyatli!',
+                title: 'Muvaffaqiyatli yangilandi!',
                 icon: 'success',
                 position: 'top-end',
                 timer: 3000,
@@ -185,16 +211,7 @@ export default function AdminTestCreate() {
                 toast: true,
                 showConfirmButton: false,
             });
-            setForm({
-                isTelegram: true,
-                isWeb: true,
-                name: "",
-                price: 0,
-                testCount: 0,
-                testTime: 0,
-            });
-            navigate(-1)
-            setSelectedQuestionIds([]);
+            navigate(-1);
         } catch (error) {
             console.error(error);
             Swal.fire({
@@ -207,7 +224,8 @@ export default function AdminTestCreate() {
                 showCloseButton: true,
                 toast: true,
                 showConfirmButton: false,
-            }); if (error?.status === 401) {
+            });
+            if (error?.response?.status === 401) {
                 navigate('/login')
                 localStorage.clear()
             }
@@ -215,32 +233,50 @@ export default function AdminTestCreate() {
     };
 
     useEffect(() => {
-        getCourse()
-    }, [])
+        getCourse();
+        if (id) {
+            getTest();
+        }
+    }, [id])
+
+    if (loading.test) {
+        return (
+            <div className="flex items-center justify-center h-screen w-full">
+                <ReactLoading
+                    type="spinningBubbles"
+                    color="#000"
+                    height={100}
+                    width={100}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-screen overflow-y-auto bg-gray-100 p-6 md:p-10">
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 ">Test yaratish</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 ">
+                        {id ? "Testni tahrirlash" : "Test yaratish"}
+                    </h1>
                     <Button
-                        onClick={createTest}
+                        onClick={updateTest}
                         className="bg-green-500 hover:bg-green-600"
                         disabled={!form.name || selectedQuestionIds.length === 0}
                     >
-                        Test yaratish ({selectedQuestionIds.length} ta savol)
+                        {id ? "Testni yangilash" : "Test yaratish"} ({selectedQuestionIds.length} ta savol)
                     </Button>
                 </div>
                 <Card className="w-full mb-[20px] shadow-md">
                     <CardBody className="">
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 ">
                             <Input
                                 label="Nomi"
                                 value={form.name}
                                 onChange={(e) => handleChange("name", e.target.value)}
+                                className="flex-1 min-w-[200px]"
                             />
 
-                            {/* Price */}
                             <Input
                                 label="Narxi"
                                 type="text"
@@ -248,25 +284,26 @@ export default function AdminTestCreate() {
                                 onChange={(e) =>
                                     handleChange("price", e.target.value.replace(/\s/g, ""))
                                 }
+                                className="flex-1 min-w-[200px]"
                             />
-                            {/* Test Count */}
+
                             <Input
                                 label="Test soni"
                                 type="number"
                                 value={form.testCount}
-                                onChange={(e) => handleChange("testCount", Number(e.target.value))}
+                                onChange={(e) => handleChange("testCount", e.target.value)}
+                                className="flex-1 min-w-[200px]"
                             />
 
-                            {/* Test Time */}
                             <Input
                                 label="Test vaqti (daq)"
                                 type="number"
                                 value={form.testTime}
-                                onChange={(e) => handleChange("testTime", Number(e.target.value))}
+                                onChange={(e) => handleChange("testTime", e.target.value)}
+                                className="flex-1 min-w-[200px]"
                             />
 
-                            {/* Checkboxes */}
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-6">
                                 <Checkbox
                                     label="Telegram"
                                     checked={form.isTelegram}
