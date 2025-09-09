@@ -567,6 +567,12 @@ export default function ResultDetail() {
                                                     <Typography color="red">
                                                         Sizning javobingiz: {q.wrongAnswer}
                                                     </Typography>
+                                                    <div className="flex items-center gap-2">
+                                                        <b>AI izohi:</b>
+                                                        <Typography color="red"
+                                                            dangerouslySetInnerHTML={{ __html: q.correct_answer_ai_description }}
+                                                        />
+                                                    </div>
                                                 </CardBody>
                                             </Card>
                                         ))}
