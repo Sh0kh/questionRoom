@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input, Typography } from '@material-tailwind/react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
+import WebApp from "@twa-dev/sdk";
 import Swal from 'sweetalert2';
 
 const Login = () => {
@@ -12,17 +13,13 @@ const Login = () => {
 
   // Берём chatId из Telegram WebApp SDK
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    tg?.ready();
+    WebApp.ready();
 
-    const data = tg?.initDataUnsafe || {};
-    const userId = data?.user?.id || null;
-    const chatIdValue = (data?.chat?.id ?? userId) || null;
+    const data = WebApp.initDataUnsafe;
+    const userIdValue = data?.user?.id || null;
+    const chatIdValue = (data?.chat?.id ?? userIdValue) || null;
 
-    if (chatIdValue) {
-      setChatId(chatIdValue);
-      localStorage.setItem('chatId', chatIdValue);
-    }
+    setChatId(chatIdValue);
   }, []);
 
   const handleLogin = async () => {
@@ -31,7 +28,7 @@ const Login = () => {
         params: {
           login,
           password,
-          chatId 
+          chatId
         }
       });
 
@@ -96,11 +93,11 @@ const Login = () => {
       <div className="w-full max-w-md p-6 border-[2px] relative z-50 border-[black] bg-white rounded-lg shadow-lg text-center">
         <h2 className="text-2xl font-semibold text-center mb-6">Kirish</h2>
 
-        {chatId && (
-          <Typography color="green" className="mb-4">
-            Sizning Chat ID: <b>{chatId}</b>
-          </Typography>
-        )}
+        {/* {chatId && ( */}
+        <Typography color="green" className="mb-4">
+          Sizning Chat ID: <b>{chatId || 'Noma\'lum'}</b>
+        </Typography>
+        {/* )} */}
 
         <div className="space-y-4">
           <Input
