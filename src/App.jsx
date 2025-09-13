@@ -24,6 +24,8 @@ import AdminUserEdit from "./Pages/AdminUserEdit";
 import ResultDetail from "./Pages/ResultDetail";
 import AdminResultDetail from "./Pages/AdminResultDetail";
 import AdminTestEdit from "./Pages/AdminTestEdit";
+import Register from "./Pages/Register";
+import UserTest from "./Pages/UserTest";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");  // Check for token
@@ -41,6 +43,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Main Route */}
         <Route path="/" element={<AppLayout />}>
@@ -50,6 +53,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/result" element={<ErrorPage />} />
             <Route path="/result/:id" element={<ResultDetail />} />
+            <Route path="/user/tests" element={<UserTest />} />
           </Route>
           {/* Admin Routes - Protected */}
           <Route

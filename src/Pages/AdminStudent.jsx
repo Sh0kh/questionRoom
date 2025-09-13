@@ -367,7 +367,7 @@ export default function AdminStudent() {
                                     <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Ism</th>
                                     <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Tug'ilgan kun</th>
                                     <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Telefon</th>
-                                    <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Test</th>
+                                    <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Hisob</th>
                                     <th className="py-4 px-6 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Sozlama</th>
                                 </tr>
                             </thead>
@@ -385,21 +385,7 @@ export default function AdminStudent() {
                                         <td className="py-4 px-6 text-gray-700">{course?.dateBirth}</td>
                                         <td className="py-4 px-6 text-gray-700">{course?.username}</td>
                                         <td className="py-4 px-6">
-                                            {course?.courseId === null ? (
-                                                <div className="flex items-center text-green-600">
-                                                    <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                    <span className="text-sm font-medium">Mavjud</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center text-red-600">
-                                                    <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                    </svg>
-                                                    <span className="text-sm font-medium">Yo'q</span>
-                                                </div>
-                                            )}
+                                           {course?.balance} UZS
                                         </td>
                                         <td className="py-4 px-6">
                                             <div className="flex justify-center space-x-2">

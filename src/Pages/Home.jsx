@@ -3,13 +3,15 @@ import Header from "../Components/User/Header";
 import WarningModal from "../Components/WarningModal";
 import { useEffect, useState } from "react";
 import QuizCard from "../Components/User/QuizCard";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ReactLoading from "react-loading";
 import Swal from "sweetalert2";
 import FinishModal from "../Components/FinishModal";
 
 export default function Home() {
-    const testId = localStorage.getItem("testId");
+    const location = useLocation();
+    const Device = localStorage.getItem('isTelegram')
+    const activeTestId = location.state?.testID || localStorage.getItem("testId");
     const [startExam, setStartExam] = useState(false);
     const [hasShownModal, setHasShownModal] = useState(false);
     const [Test, setTest] = useState(null);
@@ -17,28 +19,28 @@ export default function Home() {
     const [incorrectAnswers, setIncorrectAnswers] = useState(0);
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [timeLeft, setTimeLeft] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedOptions, setSelectedOptions] = useState({});
     const [openEndedAnswers, setOpenEndedAnswers] = useState({});
     const [shuffledQuizData, setShuffledQuizData] = useState([]);
     const navigate = useNavigate();
     const [openModal, setOpenModal] = useState(false);
 
+
     const getTest = async () => {
-        setLoading(true);
         try {
             const response = await axios.get(`/test/get/by/id/for/test`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
-                params: { id: testId },
+                params: { id: activeTestId },
             });
 
             const test = response?.data?.object;
             setTest(test);
 
             const seconds = (test?.testTime || 0) * 60;
-            setTimeLeft(seconds);
+            setTimeLeft(seconds); // Устанавливаем время, но не запускаем таймер
 
             setTotalQuestions(Math.min(test?.quiz?.length || 0, 30));
             setIncorrectAnswers(Math.min(test?.quiz?.length || 0, 30));
@@ -64,14 +66,14 @@ export default function Home() {
         setShuffledQuizData(shuffledData);
     };
 
+    // Загружаем тест при монтировании компонента
     useEffect(() => {
-        if (startExam) {
-            getTest();
-        }
-    }, [startExam]);
+        getTest();
+    }, []);
 
+    // Запускаем таймер только после подтверждения модального окна
     useEffect(() => {
-        if (timeLeft === null || timeLeft <= 0) return;
+        if (!startExam || timeLeft === null || timeLeft <= 0) return;
 
         const timerId = setInterval(() => {
             setTimeLeft((prev) => {
@@ -85,7 +87,7 @@ export default function Home() {
         }, 1000);
 
         return () => clearInterval(timerId);
-    }, [timeLeft, navigate]);
+    }, [timeLeft, startExam, navigate]);
 
     const handleFinishTest = async () => {
         try {
@@ -95,23 +97,26 @@ export default function Home() {
             const correctAnswerQuizIds = [];
             const wrongAnswerQuizIds = [];
 
-            // Проверяем, ответил ли пользователь хотя бы на один вопрос
-            const hasAnsweredAnyQuestion = Object.keys(selectedOptions).length > 0 ||
-                Object.keys(openEndedAnswers).length > 0;
 
-            // Если пользователь не ответил ни на один вопрос, помечаем все вопросы как неправильные
-            if (!hasAnsweredAnyQuestion) {
-                shuffledQuizData.forEach(question => {
-                    wrongAnswerQuizIds.push({
-                        quizId: question.id,
-                        wrongAnswer: "No answer"
-                    });
-                });
-            } else {
-                // Обычная логика проверки ответов
-                shuffledQuizData.forEach(question => {
-                    if (question.quizType === 'OPEN_ENDED') {
-                        const userAnswer = openEndedAnswers[question.id] || "";
+            // Используем Test?.quiz если shuffledQuizData пустой
+            const quizDataToUse = shuffledQuizData.length > 0 ? shuffledQuizData : (Test?.quiz || []).slice(0, 30);
+
+
+            // Проходим по всем вопросам теста
+            quizDataToUse.forEach(question => {
+                if (question.quizType === 'OPEN_ENDED') {
+                    // Для открытых вопросов
+                    const userAnswer = openEndedAnswers[question.id];
+
+                    // Проверяем, был ли дан ответ
+                    if (!userAnswer || userAnswer.trim() === '') {
+                        // Вопрос не был отвечан
+                        wrongAnswerQuizIds.push({
+                            quizId: question.id,
+                            wrongAnswer: ""
+                        });
+                    } else {
+                        // Вопрос был отвечан, проверяем правильность
                         const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s/g, "");
                         const normalizedCorrectAnswer = question.correctAnswer.toLowerCase().replace(/\s/g, "");
 
@@ -120,23 +125,34 @@ export default function Home() {
                         } else {
                             wrongAnswerQuizIds.push({
                                 quizId: question.id,
-                                wrongAnswer: userAnswer || "No answer"
+                                wrongAnswer: userAnswer
                             });
                         }
-                    } else {
-                        const userAnswer = selectedOptions[question.id];
+                    }
+                } else {
+                    // Для вопросов с множественным выбором
+                    const userAnswer = selectedOptions[question.id];
 
+                    // Проверяем, был ли выбран ответ
+                    if (!userAnswer || userAnswer === undefined) {
+                        // Вопрос не был отвечан
+                        wrongAnswerQuizIds.push({
+                            quizId: question.id,
+                            wrongAnswer: ""
+                        });
+                    } else {
+                        // Вопрос был отвечан, проверяем правильность
                         if (userAnswer === question.correctAnswer) {
                             correctAnswerQuizIds.push(question.id);
                         } else {
                             wrongAnswerQuizIds.push({
                                 quizId: question.id,
-                                wrongAnswer: userAnswer || "No answer"
+                                wrongAnswer: userAnswer
                             });
                         }
                     }
-                });
-            }
+                }
+            });
 
             const requestData = {
                 correctAnswerCount: correctAnswerQuizIds.length,
@@ -144,12 +160,12 @@ export default function Home() {
                 wrongAnswerCount: wrongAnswerQuizIds.length,
                 wrongAnswerQuizIds: wrongAnswerQuizIds,
                 studentId: parseInt(studentId),
-                testId: parseInt(testId),
-                isTelegram: Test?.isTelegram || false
+                testId: parseInt(activeTestId),
+                isTelegram: Device === 'telegram' ? true : false,
+                isWeb: Device === 'telegram' ? false : true
             };
-
             // Отправляем результаты на сервер
-            await axios.post('/result/create', requestData, {
+            const response = await axios.post('/result/create', requestData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 }
@@ -161,8 +177,13 @@ export default function Home() {
                 icon: "success",
                 confirmButtonText: "OK",
             }).then(() => {
-                navigate("/result");
+                if (Device === "telegram") {
+                    navigate("/result");
+                } else {
+                    navigate(`/result/${response?.data?.object?.id}`);
+                }
             });
+
 
         } catch (error) {
             console.error('Xatolik test natijalarini yuborishda:', error);
@@ -174,17 +195,6 @@ export default function Home() {
             });
         }
     };
-
-    if (!hasShownModal) {
-        return (
-            <WarningModal
-                startExam={() => {
-                    setStartExam(true);
-                    setHasShownModal(true);
-                }}
-            />
-        );
-    }
 
     if (loading) {
         return (
@@ -199,19 +209,36 @@ export default function Home() {
         );
     }
 
-    if (Test === false) {
+    // Показываем модальное окно после загрузки теста, но до начала экзамена
+    if (!hasShownModal && Test) {
         return (
-            <div className="h-screen w-full flex items-center justify-center p-[30px]">
-                <div className="bg-white rounded-[20px] w-full flex items-center justify-center h-[500px]">
-                    <div>
-                        <h1 className="text-[25px]">Test tugatilgan</h1>
-                        <NavLink
-                            className="text-center mt-[22px] underline block"
-                            to="/login"
-                        >
-                            Loginga qaytish
-                        </NavLink>
-                    </div>
+            <WarningModal
+                data={Test}
+                startExam={() => {
+                    setStartExam(true);
+                    setHasShownModal(true);
+                }}
+            />
+        );
+    }
+
+    if (Test === null) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center bg-gray-100 p-6">
+                <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 text-center">
+                    <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+                        Test yakunlandi
+                    </h1>
+                    <p className="text-gray-600 mb-6">
+                        Siz testni muvaffaqiyatli tugatdingiz. Iltimos, qaytadan tizimga
+                        kirish uchun login sahifasiga o‘ting.
+                    </p>
+                    <NavLink
+                        to="/login"
+                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-xl transition-colors"
+                    >
+                        Loginga qaytish
+                    </NavLink>
                 </div>
             </div>
         );

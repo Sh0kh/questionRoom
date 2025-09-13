@@ -4,29 +4,21 @@ import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import QuizDelete from "../Components/AdminQuiz/QuizDelete";
 import QuestionEdit from "../Components/AdminQuiz/QuestionEdit";
+import ReactLoading from 'react-loading';
+
 
 export default function AdminRating() {
     const navigate = useNavigate();
     const [testData, setTestData] = useState([]);
     const [rating, setRating] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const [testId, setTestId] = useState(null);
     const [itemsData, setItemsData] = useState(null);
     const [EditData, setEditData] = useState(null);
 
-    // Диапазон дат (по умолчанию текущий месяц)
-    const getMonthRange = () => {
-        const now = new Date();
-        const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        return {
-            start: startDate.toISOString().split("T")[0], // YYYY-MM-DD
-            end: endDate.toISOString().split("T")[0],
-        };
-    };
-
-    const [start, setStart] = useState(getMonthRange().start);
-    const [end, setEnd] = useState(getMonthRange().end);
+    const [start, setStart] = useState("");
+    const [end, setEnd] = useState("");
 
     // Получить тесты
     const getAllTest = async () => {
@@ -40,17 +32,26 @@ export default function AdminRating() {
         }
     };
 
+    // Sana formatlash helper function
+    const formatDateToDDMMYYYY = (dateStr) => {
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split("-");
+        return `${day}/${month}/${year}`;
+    };
+
     // Получить рейтинг
     const getRating = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`/result/get/rating`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 params: {
-                    start: new Date(start).getTime(),
-                    end: new Date(end).getTime(),
+                    start: formatDateToDDMMYYYY(start),
+                    end: formatDateToDDMMYYYY(end),
                     testId,
                 },
             });
+
             const rat = Array.isArray(response?.data?.object)
                 ? response.data.object
                 : [];
@@ -62,6 +63,8 @@ export default function AdminRating() {
                 navigate("/login");
                 localStorage.clear();
             }
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -69,10 +72,20 @@ export default function AdminRating() {
         getAllTest();
     }, []);
 
+
+    if (loading) {
+        return (
+            <div className='flex items-center justify-center h-screen w-full'>
+                <ReactLoading type="spinningBubbles" color="#000" height={100} width={100} />
+            </div>
+        );
+    }
+
+
     return (
         <div className="w-full h-screen overflow-y-auto bg-gray-100 p-6 md:p-10">
             {/* Фильтры */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-6">
                 {/* Выбор теста */}
                 <Select
                     className="bg-white"
@@ -105,11 +118,7 @@ export default function AdminRating() {
                 />
 
                 {/* Кнопка */}
-                <Button
-                    color="blue"
-                    onClick={getRating}
-                    disabled={!testId}
-                >
+                <Button className="w-[300px]" color="blue" onClick={getRating} disabled={!testId}>
                     Filterlash
                 </Button>
             </div>
@@ -128,7 +137,6 @@ export default function AdminRating() {
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">№</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Ism Familiya</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Tel</th>
-                                    <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Urinishlar soni</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Natija %</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">Savollar soni</th>
                                     <th className="py-3 px-4 text-sm font-medium text-gray-600 text-center">To'g'ri javob</th>
@@ -136,28 +144,48 @@ export default function AdminRating() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rating?.map((i, index) => (
-                                    <tr
-                                        key={i.studentId}
-                                        className="border-t border-t-[2px] cursor-pointer text-center hover:bg-gray-50"
-                                    >
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{index + 1}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">
-                                            <NavLink
-                                                className="underline"
-                                                to={`/admin/student/${i?.studentId}?firstName=${i.studentName}`}
-                                            >
-                                                {i.studentName}
-                                            </NavLink>
-                                        </td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.studentPhone}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.attemptsCount}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i.correctPercent}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">30</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i?.correctAnswer}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-800 text-center">{i?.wrongAnswer}</td>
-                                    </tr>
-                                ))}
+                                {rating?.map((i, index) => {
+                                    const totalCount =
+                                        (i?.wrongAnswerCount || 0) +
+                                        (i?.correctAnswerCount || 0);
+
+                                    return (
+                                        <tr
+                                            key={i.studentId}
+                                            className="border-t border-t-[2px] cursor-pointer text-center hover:bg-gray-50"
+                                        >
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                {index + 1}
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                <NavLink
+                                                    className="underline"
+                                                    to={`/admin/student/${i?.studentId}?firstName=${i.studentName}`}
+                                                >
+                                                    {i?.user?.firstName} {i?.user?.lastName}
+                                                </NavLink>
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                {i?.user?.phoneNumber}
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                {totalCount > 0
+                                                    ? ((i.correctAnswerCount / totalCount) * 100).toFixed(2) + "%"
+                                                    : "0%"}
+                                            </td>
+
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                {totalCount}
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                {i?.correctAnswerCount}
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-800 text-center">
+                                                {i?.wrongAnswerCount}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

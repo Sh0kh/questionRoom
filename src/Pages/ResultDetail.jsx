@@ -25,6 +25,7 @@ import html2canvas from "html2canvas";
 
 export default function ResultDetail() {
     const { id } = useParams();
+    const Device = localStorage.getItem(`isTelegram`)
     const [loading, setLoading] = useState(true);
     const [result, setResult] = useState(null);
     const [exportingPdf, setExportingPdf] = useState(false);
@@ -383,58 +384,64 @@ export default function ResultDetail() {
     const { user, testResult } = result;
 
     return (
-        <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+        <div className="p-2 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-5xl mx-auto">
             {/* Header with Export Button */}
-            <div className="flex justify-between items-center">
-                <Typography variant="h4" className="text-gray-800">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                <Typography variant="h4" className="text-gray-800 text-xl sm:text-2xl md:text-3xl">
                     Test Natijalari
                 </Typography>
-                <Button
-                    onClick={exportToPDF}
-                    disabled={exportingPdf}
-                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600"
-                    size="sm"
-                >
-                    {exportingPdf ? (
-                        <>
-                            <ReactLoading
-                                type="spin"
-                                color="#fff"
-                                height={16}
-                                width={16}
-                            />
-                            <span>Yuklanmoqda...</span>
-                        </>
-                    ) : (
-                        <>
-                            <DocumentArrowDownIcon className="h-4 w-4" />
-                            <span>PDF Yuklab olish</span>
-                        </>
-                    )}
-                </Button>
+                {Device === 'telegram' && (
+                    <Button
+                        onClick={exportToPDF}
+                        disabled={exportingPdf}
+                        className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 w-full sm:w-auto text-sm sm:text-base"
+                        size="sm"
+                    >
+                        {exportingPdf ? (
+                            <>
+                                <ReactLoading
+                                    type="spin"
+                                    color="#fff"
+                                    height={16}
+                                    width={16}
+                                />
+                                <span className="hidden sm:inline">Yuklanmoqda...</span>
+                                <span className="sm:hidden">Yuklanmoqda</span>
+                            </>
+                        ) : (
+                            <>
+                                <DocumentArrowDownIcon className="h-4 w-4" />
+                                <span className="hidden sm:inline">PDF Yuklab olish</span>
+                                <span className="sm:hidden">PDF</span>
+                            </>
+                        )}
+                    </Button>
+                )}
             </div>
 
             {/* Student Info */}
             <Card className="shadow-lg">
-                <CardBody className="space-y-2">
+                <CardBody className="space-y-2 p-3 sm:p-4 md:p-6">
                     <div className="flex items-center gap-2">
-                        <UserIcon className="h-6 w-6 text-blue-500" />
-                        <Typography variant="h5">Student ma'lumotlari</Typography>
+                        <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+                        <Typography variant="h5" className="text-lg sm:text-xl">Student ma'lumotlari</Typography>
                     </div>
-                    <Typography>
-                        <b>Ism Familiya:</b> {user.firstName} {user.lastName}
-                    </Typography>
-                    <Typography>
-                        <b>Telefon:</b> {user.phoneNumber}
-                    </Typography>
-                    <Typography>
-                        <b>Balans:</b>{" "}
-                        {user.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")} so'm
-                    </Typography>
-                    <Typography>
-                        <b>Jinsi:</b> {user.genderType}
-                    </Typography>
-                    <Typography>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+                        <Typography className="text-sm sm:text-base">
+                            <b>Ism Familiya:</b> {user.firstName} {user.lastName}
+                        </Typography>
+                        <Typography className="text-sm sm:text-base">
+                            <b>Telefon:</b> {user.phoneNumber}
+                        </Typography>
+                        <Typography className="text-sm sm:text-base">
+                            <b>Balans:</b>{" "}
+                            {user.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")} so'm
+                        </Typography>
+                        <Typography className="text-sm sm:text-base">
+                            <b>Jinsi:</b> {user.genderType}
+                        </Typography>
+                    </div>
+                    <Typography className="text-sm sm:text-base">
                         <b>Hisob turi:</b> {user.accountType}
                     </Typography>
                 </CardBody>
@@ -442,46 +449,46 @@ export default function ResultDetail() {
 
             {/* Test Result */}
             <Card className="shadow-lg">
-                <CardBody className="space-y-2">
+                <CardBody className="space-y-2 p-3 sm:p-4 md:p-6">
                     <div className="flex items-center gap-2">
-                        <ChartBarIcon className="h-6 w-6 text-green-500" />
-                        <Typography variant="h5">Test natijalari</Typography>
+                        <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
+                        <Typography variant="h5" className="text-lg sm:text-xl">Test natijalari</Typography>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                        <div className="bg-green-50 p-4 rounded-lg text-center">
-                            <Typography className="text-2xl font-bold text-green-600">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mt-4">
+                        <div className="bg-green-50 p-2 sm:p-4 rounded-lg text-center">
+                            <Typography className="text-lg sm:text-2xl font-bold text-green-600">
                                 {testResult.correctAnswerCount}
                             </Typography>
-                            <Typography className="text-sm text-gray-600">
+                            <Typography className="text-xs sm:text-sm text-gray-600">
                                 To'g'ri javoblar
                             </Typography>
                         </div>
-                        <div className="bg-red-50 p-4 rounded-lg text-center">
-                            <Typography className="text-2xl font-bold text-red-600">
+                        <div className="bg-red-50 p-2 sm:p-4 rounded-lg text-center">
+                            <Typography className="text-lg sm:text-2xl font-bold text-red-600">
                                 {testResult.wrongAnswerCount}
                             </Typography>
-                            <Typography className="text-sm text-gray-600">
+                            <Typography className="text-xs sm:text-sm text-gray-600">
                                 Noto'g'ri javoblar
                             </Typography>
                         </div>
-                        <div className="bg-blue-50 p-4 rounded-lg text-center">
-                            <Typography className="text-2xl font-bold text-blue-600">
+                        <div className="bg-blue-50 p-2 sm:p-4 rounded-lg text-center">
+                            <Typography className="text-lg sm:text-2xl font-bold text-blue-600">
                                 {testResult.correctAnswerCount + testResult.wrongAnswerCount}
                             </Typography>
-                            <Typography className="text-sm text-gray-600">
+                            <Typography className="text-xs sm:text-sm text-gray-600">
                                 Jami savollar
                             </Typography>
                         </div>
-                        <div className="bg-purple-50 p-4 rounded-lg text-center">
-                            <Typography className="text-2xl font-bold text-purple-600">
+                        <div className="bg-purple-50 p-2 sm:p-4 rounded-lg text-center col-span-2 lg:col-span-1">
+                            <Typography className="text-lg sm:text-2xl font-bold text-purple-600">
                                 {((testResult.correctAnswerCount / (testResult.correctAnswerCount + testResult.wrongAnswerCount)) * 100).toFixed(1)}%
                             </Typography>
-                            <Typography className="text-sm text-gray-600">
+                            <Typography className="text-xs sm:text-sm text-gray-600">
                                 Natija
                             </Typography>
                         </div>
                     </div>
-                    <Typography className="mt-4">
+                    <Typography className="mt-4 text-sm sm:text-base">
                         <b>Telegram orqali topshirilganmi:</b>{" "}
                         {testResult.isTelegram ? "Ha" : "Yo'q"}
                     </Typography>
@@ -489,100 +496,107 @@ export default function ResultDetail() {
             </Card>
 
             {/* Answers Tabs */}
-            <Card className="shadow-lg">
-                <CardBody>
-                    <Tabs value="correct">
-                        <TabsHeader>
-                            <Tab key="correct" value="correct">
-                                <div className="flex items-center gap-1">
-                                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                                    <span>To'g'ri javoblar</span>
-                                </div>
-                            </Tab>
-                            <Tab key="wrong" value="wrong">
-                                <div className="flex items-center gap-1">
-                                    <XCircleIcon className="h-5 w-5 text-red-500" />
-                                    <span>Noto'g'ri javoblar</span>
-                                </div>
-                            </Tab>
-                        </TabsHeader>
-                        <TabsBody>
-                            {/* Correct Answers */}
-                            <TabPanel key="correct" value="correct">
-                                {testResult.correctAnswers.length === 0 ? (
-                                    <Typography color="gray">Ma'lumot yo'q</Typography>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {testResult.correctAnswers.map((q, i) => (
-                                            <Card key={q.id} className="border border-green-300">
-                                                <CardBody className="space-y-2">
-                                                    <Typography className="font-bold">
-                                                        {i + 1}. {q.question}
-                                                    </Typography>
-                                                    {q.option && q.option.length > 0 && (
-                                                        <div>
-                                                            <b>Variantlar:</b>
-                                                            <ul className="list-decimal list-inside">
-                                                                {q.option.map((opt, idx) => (
-                                                                    <li key={idx}>{opt}</li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                    <Typography color="green">
-                                                        To'g'ri javob: {q.correctAnswer}
-                                                    </Typography>
-                                                </CardBody>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                )}
-                            </TabPanel>
 
-                            {/* Wrong Answers */}
-                            <TabPanel key="wrong" value="wrong">
-                                {testResult.wrongAnswers.length === 0 ? (
-                                    <Typography color="gray">Ma'lumot yo'q</Typography>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {testResult.wrongAnswers.map((q, i) => (
-                                            <Card key={q.id} className="border border-red-300">
-                                                <CardBody className="space-y-2">
-                                                    <Typography className="font-bold">
-                                                        {i + 1}. {q.question}
-                                                    </Typography>
-                                                    {q.option && q.option.length > 0 && (
-                                                        <div>
-                                                            <b>Variantlar:</b>
-                                                            <ul className="list-decimal list-inside">
-                                                                {q.option.map((opt, idx) => (
-                                                                    <li key={idx}>{opt}</li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                    <Typography color="green">
-                                                        To'g'ri javob: {q.correctAnswer}
-                                                    </Typography>
-                                                    <Typography color="red">
-                                                        Sizning javobingiz: {q.wrongAnswer}
-                                                    </Typography>
-                                                    <div className="flex items-center gap-2">
-                                                        <b>AI izohi:</b>
-                                                        <Typography color="red"
-                                                            dangerouslySetInnerHTML={{ __html: q.correct_answer_ai_description }}
-                                                        />
-                                                    </div>
-                                                </CardBody>
-                                            </Card>
-                                        ))}
+            {Device === 'telegram' && (
+                <Card className="shadow-lg">
+                    <CardBody className="p-2 sm:p-4 md:p-6">
+                        <Tabs value="correct">
+                            <TabsHeader className="grid grid-cols-2 gap-1">
+                                <Tab key="correct" value="correct" className="text-xs sm:text-sm">
+                                    <div className="flex items-center gap-1">
+                                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                                        <span className="hidden sm:inline">To'g'ri javoblar</span>
+                                        <span className="sm:hidden">To'g'ri</span>
                                     </div>
-                                )}
-                            </TabPanel>
-                        </TabsBody>
-                    </Tabs>
-                </CardBody>
-            </Card>
+                                </Tab>
+                                <Tab key="wrong" value="wrong" className="text-xs sm:text-sm">
+                                    <div className="flex items-center gap-1">
+                                        <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+                                        <span className="hidden sm:inline">Noto'g'ri javoblar</span>
+                                        <span className="sm:hidden">Noto'g'ri</span>
+                                    </div>
+                                </Tab>
+                            </TabsHeader>
+                            <TabsBody>
+                                {/* Correct Answers */}
+                                <TabPanel key="correct" value="correct" className="p-2 sm:p-4">
+                                    {testResult.correctAnswers.length === 0 ? (
+                                        <Typography color="gray" className="text-sm sm:text-base">Ma'lumot yo'q</Typography>
+                                    ) : (
+                                        <div className="space-y-3 sm:space-y-4">
+                                            {testResult.correctAnswers.map((q, i) => (
+                                                <Card key={q.id} className="border border-green-300">
+                                                    <CardBody className="space-y-2 p-3 sm:p-4">
+                                                        <Typography className="font-bold text-sm sm:text-base">
+                                                            {i + 1}. {q.question}
+                                                        </Typography>
+                                                        {q.option && q.option.length > 0 && (
+                                                            <div className="text-sm sm:text-base">
+                                                                <b>Variantlar:</b>
+                                                                <ul className="list-decimal list-inside ml-2 sm:ml-4 space-y-1">
+                                                                    {q.option.map((opt, idx) => (
+                                                                        <li key={idx} className="text-xs sm:text-sm">{opt}</li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                        <Typography color="green" className="text-sm sm:text-base">
+                                                            <b>To'g'ri javob:</b> {q.correctAnswer}
+                                                        </Typography>
+                                                    </CardBody>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    )}
+                                </TabPanel>
+
+                                {/* Wrong Answers */}
+                                <TabPanel key="wrong" value="wrong" className="p-2 sm:p-4">
+                                    {testResult.wrongAnswers.length === 0 ? (
+                                        <Typography color="gray" className="text-sm sm:text-base">Ma'lumot yo'q</Typography>
+                                    ) : (
+                                        <div className="space-y-3 sm:space-y-4">
+                                            {testResult.wrongAnswers.map((q, i) => (
+                                                <Card key={q.id} className="border border-red-300">
+                                                    <CardBody className="space-y-2 p-3 sm:p-4">
+                                                        <Typography className="font-bold text-sm sm:text-base">
+                                                            {i + 1}. {q.question}
+                                                        </Typography>
+                                                        {q.option && q.option.length > 0 && (
+                                                            <div className="text-sm sm:text-base">
+                                                                <b>Variantlar:</b>
+                                                                <ul className="list-decimal list-inside ml-2 sm:ml-4 space-y-1">
+                                                                    {q.option.map((opt, idx) => (
+                                                                        <li key={idx} className="text-xs sm:text-sm">{opt}</li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                        <Typography color="green" className="text-sm sm:text-base">
+                                                            <b>To'g'ri javob:</b> {q.correctAnswer}
+                                                        </Typography>
+                                                        <Typography color="red" className="text-sm sm:text-base">
+                                                            <b>Sizning javobingiz:</b> {q.wrongAnswer}
+                                                        </Typography>
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                                            <b className="text-sm sm:text-base">AI izohi:</b>
+                                                            <Typography
+                                                                color="red"
+                                                                className="text-xs sm:text-sm"
+                                                                dangerouslySetInnerHTML={{ __html: q.correct_answer_ai_description }}
+                                                            />
+                                                        </div>
+                                                    </CardBody>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    )}
+                                </TabPanel>
+                            </TabsBody>
+                        </Tabs>
+                    </CardBody>
+                </Card>
+            )}
         </div>
     );
 }

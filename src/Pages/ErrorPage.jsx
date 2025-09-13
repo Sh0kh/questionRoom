@@ -7,6 +7,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 export default function ErrorPage() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const Divase = localStorage.getItem(`isTelegram`);
     const navigate = useNavigate();
 
     const getResult = async () => {
@@ -34,68 +35,74 @@ export default function ErrorPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen w-full">
-                <ReactLoading
-                    type="spinningBubbles"
-                    color="#000"
-                    height={100}
-                    width={100}
-                />
+                <ReactLoading type="spinningBubbles" color="#000" height={60} width={60} />
             </div>
         );
     }
 
     return (
-        <div className="Error w-full min-h-screen p-6 bg-gray-100 pb-[200px]">
-            <div className="flex items-center justify-between">
-                <h1 className="text-center text-[30px] font-bold">Natijalar</h1>
+        <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6 pb-32">
+            {/* header */}
+            <div className="flex items-center justify-between gap-2">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Natijalar</h1>
                 <Button
                     color="gray"
                     onClick={() => {
                         localStorage.clear();
                         navigate("/login");
                     }}
-                    className="bg-black text-white hover:bg-gray-800"
+                    className="bg-black text-white hover:bg-gray-800 px-2 py-1 text-sm sm:px-4 sm:py-2 sm:text-base rounded-lg"
                 >
                     Qayta boshlash
                 </Button>
             </div>
 
             {data && data.length > 0 ? (
-                <div className="flex flex-col gap-6 mt-6">
-                    {data.map((i, index) => (
-                        <NavLink to={`/result/${i?.resultId}`} >
-                            <div
-                                key={index}
-                                className="bg-white shadow-lg rounded-xl p-5 w-full"
-                            >
-                                <h2 className="text-lg font-bold text-gray-800 mb-3">
-                                    Test nomi: {i.testEntity?.name}
-                                </h2>
-                                <div className="space-y-2 text-gray-700">
-                                    <p>
-                                        <span className="font-semibold">To‘g‘ri javoblar:</span>{" "}
-                                        {i.correctAnswerCount}
-                                    </p>
-                                    <p>
-                                        <span className="font-semibold">Noto‘g‘ri javoblar:</span>{" "}
-                                        {i.wrongAnswerCount}
-                                    </p>
-                                    <p>
-                                        <span className="font-semibold">Umumiy savollar:</span>{" "}
-                                        {i.testEntity?.testCount}
-                                    </p>
-                                    <p>
-                                        <span className="font-semibold">Yaratilgan sana:</span>{" "}
-                                        {i.testEntity?.createdAt.split("T")[0]}
-                                    </p>
+                <div className="grid mt-6 gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                    {data.map((i, index) => {
+                        const resultId = i?.resultId ?? `res-${index}`;
+
+                        const correct = Number(i?.correctAnswerCount ?? 0);
+                        const wrong = Number(i?.wrongAnswerCount ?? 0);
+                        const totalEntity = Number(i?.testEntity?.testCount);
+
+                        const total = Number.isFinite(totalEntity) && totalEntity > 0 ? totalEntity : correct + wrong;
+
+                        const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+                        return (
+                            <NavLink to={`/result/${resultId}`} key={resultId} className="block">
+                                <div className="bg-white shadow rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow duration-200">
+                                    <h2 className="text-base sm:text-lg font-bold text-gray-800 mb-2 truncate">
+                                        Test nomi: {i.testEntity?.name}
+                                    </h2>
+
+                                    <div className="space-y-1 sm:space-y-2 text-sm sm:text-base text-gray-700">
+                                        <p>
+                                            <span className="font-semibold">To‘g‘ri javoblar:</span> {correct}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Noto‘g‘ri javoblar:</span> {wrong}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Umumiy savollar:</span> {total}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Natija:</span> {percent}%
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Yaratilgan sana:</span>{" "}
+                                            {i.testEntity?.createdAt ? i.testEntity.createdAt.split("T")[0] : "-"}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </NavLink>
-                    ))}
+                            </NavLink>
+                        );
+                    })}
                 </div>
             ) : (
-                <div className="bg-white w-full mt-6 h-[200px] flex items-center justify-center rounded-lg shadow">
-                    <h1 className="text-gray-600">Ma'lumot yo‘q</h1>
+                <div className="bg-white w-full mt-6 h-36 sm:h-48 flex items-center justify-center rounded-lg shadow">
+                    <h1 className="text-gray-600 text-sm sm:text-base">Ma'lumot yo‘q</h1>
                 </div>
             )}
         </div>

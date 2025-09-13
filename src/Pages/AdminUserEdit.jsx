@@ -40,11 +40,19 @@ export default function AdminUserEdit() {
             const res = await axios.get(`/users/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
-            setFormData(res.data?.object || {});
+
+            const user = res.data?.object || {};
+
+            setFormData((prev) => ({
+                ...prev,
+                ...user,
+                password: "", // всегда сбрасываем
+            }));
         } catch (err) {
             console.error("Error fetching user:", err);
         }
     };
+
 
     const getAllGroups = async () => {
         try {
