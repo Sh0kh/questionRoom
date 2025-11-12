@@ -18,21 +18,14 @@ export default function QuizCard({ quizData, onScoreUpdate, onQuizDataUpdate, te
         return newArray;
     };
 
-    // Функция для выбора случайных вопросов
-    const getRandomQuestions = (questions, count) => {
-        if (questions.length <= count) return shuffleArray([...questions]);
-        const shuffled = shuffleArray([...questions]);
-        return shuffled.slice(0, count);
-    };
-
     // Перемешиваем вопросы и варианты ответов при первом рендере
     useEffect(() => {
         if (quizData) {
-            // Выбираем 30 случайных вопросов (или меньше, если вопросов меньше 30)
-            const randomQuestions = getRandomQuestions(quizData, 60);
+            // Перемешиваем все вопросы
+            const shuffledQuestions = shuffleArray([...quizData]);
 
             // Перемешиваем варианты ответов для каждого вопроса
-            const processedQuestions = randomQuestions.map(question => {
+            const processedQuestions = shuffledQuestions.map(question => {
                 if (question.quizType !== 'OPEN_ENDED' && question.option) {
                     return {
                         ...question,
