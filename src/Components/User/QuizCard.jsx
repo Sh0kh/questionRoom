@@ -29,7 +29,7 @@ export default function QuizCard({ quizData, onScoreUpdate, onQuizDataUpdate, te
     useEffect(() => {
         if (quizData) {
             // Выбираем 30 случайных вопросов (или меньше, если вопросов меньше 30)
-            const randomQuestions = getRandomQuestions(quizData, 30);
+            const randomQuestions = getRandomQuestions(quizData, 60);
 
             // Перемешиваем варианты ответов для каждого вопроса
             const processedQuestions = randomQuestions.map(question => {
